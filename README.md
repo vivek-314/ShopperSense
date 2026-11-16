@@ -16,7 +16,7 @@ The complete generated report is `docs/index.html`. Run from this repository's r
 
 Open <http://127.0.0.1:8765/>. If your machine blocks the Python preview executable, the dependency-free Node fallback is `node scripts/serve.cjs`, at <http://127.0.0.1:8766/>. A local preview is not a public submission URL. Double-clicking HTML does not reliably support `fetch()` for the threshold lab; use HTTP.
 
-Repository: [vivek-314/ShopperSense-study](https://github.com/vivek-314/ShopperSense-study). The published site URL is recorded in `site_config.json` after a successful Pages deployment. No placeholder website is presented as a working link.
+**Website:** [ShopperSense research report](https://vivek-314.github.io/ShopperSense-study/). **Repository:** [vivek-314/ShopperSense-study](https://github.com/vivek-314/ShopperSense-study). GitHub Pages deployed successfully and the published report and validation JSON were checked in the browser. The older ShopperSense repository remains untouched.
 
 ## What was actually run
 
@@ -128,7 +128,7 @@ All essential analysis is readable in static HTML. Charts have captions/alternat
 
 ## Verification
 
-Executed checks and any limitations are recorded in `results/verification.json` after final verification. The first scientific pass completed **11 pytest checks** and **six JS/Python threshold fixtures**, including 0, 0.50, 1, selected threshold, equality and no predicted positives. Five pandas deprecation warnings about the explicitly requested round-trip CSV parser are nonconvergence warnings; no estimator convergence warnings occurred. Notebook execution and browser checks are separate gates; consult the verification record for their actual outcome.
+Executed checks and limitations are recorded in `results/verification.json`. Final verification passed **11 pytest checks**, **six JS/Python threshold fixtures**, **all 16 notebook code cells** with zero error outputs, relative asset/anchor checks and source ZIP integrity. Browser checks covered desktop and 390px mobile layouts, keyboard thresholds 0, 0.24, 0.50 and 1, reset, and an isolated missing-JSON copy. A deterministic rerun reproduced validation/test metrics and predictions byte for byte. Five pandas CSV-parser deprecation warnings were nonfatal; no estimator convergence warnings occurred. The notebooks completed despite Windows selector/TCP notices and one kernel teardown connection-reset notice. Public deployment evidence is in `results/deployment.json`.
 
 The automated checks verify raw identity/schema, complete stable disjoint IDs, training-only fitted means/vocabularies, unknown-category isolation, every required variant and bounded search, finite aligned scores, hand-checkable confusion metrics, selection/threshold replay from validation only, freeze/test event ordering, group isolation, and equality between website exports and result artifacts. These do not replace human understanding or external validity.
 
