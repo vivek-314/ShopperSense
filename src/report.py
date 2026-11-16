@@ -157,6 +157,7 @@ def generate_report(output, docs, frame, parts):
     if repo and not repo.startswith('https://github.com/'):
         raise ValueError('Configure a real https://github.com/ repository URL or leave null')
     replacements = {
+        'predictor_section': predictor_evidence(docs),
         'run_id': selection['run_id'], 'hash_prefix': manifest['sha256'][:12], 'data_hash': manifest['sha256'],
         'selected_model': selected, 'chosen_threshold': f'{cut:.2f}', 'test_ap': fmt(main['ap']), 'test_f1': fmt(main['f1']), 'test_recall': pct(main['recall']),
         'session_count': f'{len(frame):,}', 'purchase_count': f'{int(frame.Revenue.sum()):,}', 'purchase_rate': pct(frame.Revenue.mean()),
@@ -205,7 +206,10 @@ def generate_report(output, docs, frame, parts):
         template = template.replace('{{'+key+'}}', str(value))
     if '{{' in template:
         raise ValueError('Unresolved report template variable')
-    (docs/'index.html').write_text(template, encoding='utf-8')
+    (docs/'research.html').write_text(template, encoding='utf-8')
+    workspace = ROOT/'src/predictor/workspace.html'
+    if workspace.exists():
+        shutil.copyfile(workspace, docs/'index.html')
     (docs/'.nojekyll').touch()
     for name in ['data_manifest.json', 'quality.json', 'selection.json', 'test_metrics.csv', 'validation_metrics.csv', 'pagevalues_comparison.csv', 'error_analysis.json', 'cv_results.csv', 'splits.json', 'threshold_grid.csv']:
         shutil.copyfile(output/name, docs/'data'/name)
@@ -215,6 +219,21 @@ def generate_report(output, docs, frame, parts):
 
 def metric_table(records, caption):
     return table(['Model / features', 'Partition · threshold', 'n / buyers', 'AP', 'ROC-AUC', 'Precision', 'Recall', 'F1', 'Accuracy', 'TN / FP / FN / TP'], [[f'{r["model"]} · {r["feature_set"]}', f'{r["partition"]} · {r["threshold"]:.2f}', f'{r["support"]} / {r["purchases"]}', *[fmt(r[k]) for k in ['ap', 'roc_auc', 'precision', 'recall', 'f1', 'accuracy']], f'{r["tn"]} / {r["fp"]} / {r["fn"]} / {r["tp"]}'] for r in records], caption)
+
+
+def predictor_evidence(docs):
+    path = docs/'data/predictor.json'
+    if not path.exists():
+        return '<p>The separate eight-input prediction workspace has not been generated yet.</p>'
+    deployed = read_json(path)
+    row = deployed['test_metrics']
+    rows = [{'model': deployed['model_name'], 'feature_set': 'eight_observable_inputs', 'partition': 'test', **row}]
+    return f'''<aside class="decision-box" id="workspace-model"><span class="eyebrow">THE DEPLOYED PREDICTION WORKSPACE IS A SEPARATE MODEL</span>
+<h3>Eight inputs for new sessions</h3><p>The <a href="./">prediction workspace</a> accepts individual inputs and CSV files from outside this dataset. It runs a separately trained {deployed['model_name']} using ProductRelated, ProductRelated_Duration, Informational, Informational_Duration, Administrative, Administrative_Duration, VisitorType and Weekend. No unshown features are filled with defaults. PageValues, bounce/exit rates and the technical category codes are excluded.</p>
+<p>This product model's test AP is <strong>{row['ap']:.3f}</strong>, compared with the full-feature research result shown above. Its frozen validation-selected threshold is {deployed['threshold']:.2f}. It found {row['tp']} of {row['purchases']} actual buyers, with {row['fp']} false alarms among {row['predicted_purchases']} flagged sessions. Its score is an uncalibrated model output, not a guaranteed purchase probability. The original benchmark's stronger metrics must never be attributed to this predictor.</p>
+<p>All three classifiers were tuned on the original training rows with the same bounded three-fold AP searches. Validation selected the model and threshold before this condition's test evaluation. The historical test split is reused from the research project, not an independent external validation. New stores, future sessions and early-session use remain unvalidated.</p>
+<p>Python/JavaScript parity is checked on all 3,700 validation/test rows and three constructed fresh sessions. Forest inference uses the fitted numeric/category preprocessing and float32 tree comparisons. Signed path contributions sum to score minus the mean root score; they are model attributions, not causal effects.</p>
+<p>Product version: <code>{deployed['run_id']}</code>. Its complete CV, selection, predictions and metrics are in <code>results/predictor/</code> in the downloadable source bundle.</p></aside>'''+metric_table(rows, 'Deployed eight-input predictor · its own final test performance')
 
 
 def model_comparison_text(summary, best_test, selected):

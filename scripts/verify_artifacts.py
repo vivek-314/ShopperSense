@@ -25,25 +25,30 @@ class Links(HTMLParser):
 
 
 def verify(compare_first=False):
-    parser = Links()
-    parser.feed((ROOT/'docs/index.html').read_text(encoding='utf-8'))
-    assert len(parser.ids) == len(set(parser.ids)), 'Duplicate HTML IDs'
     local = []
-    for link in parser.links:
-        parsed = urlsplit(link)
-        if parsed.scheme or parsed.netloc:
-            continue
-        if parsed.path:
-            assert not parsed.path.startswith('/'), f'Absolute asset URL breaks Pages subpaths: {link}'
-            path = ROOT/'docs'/unquote(parsed.path)
-            assert path.is_file(), f'Missing local asset: {link}'
-            local.append(link)
-        elif parsed.fragment:
-            assert parsed.fragment in parser.ids, f'Broken anchor: {link}'
+    total_ids = 0
+    for document in ['index.html', 'research.html']:
+        parser = Links()
+        parser.feed((ROOT/'docs'/document).read_text(encoding='utf-8'))
+        assert len(parser.ids) == len(set(parser.ids)), f'Duplicate HTML IDs in {document}'
+        total_ids += len(parser.ids)
+        for link in parser.links:
+            parsed = urlsplit(link)
+            if parsed.scheme or parsed.netloc:
+                continue
+            if parsed.path:
+                assert not parsed.path.startswith('/'), f'Absolute asset URL breaks Pages subpaths: {link}'
+                path = ROOT/'docs'/unquote(parsed.path)
+                if path.is_dir():
+                    path = path/'index.html'
+                assert path.is_file(), f'Missing local asset: {link}'
+                local.append(link)
+            elif parsed.fragment:
+                assert parsed.fragment in parser.ids, f'Broken anchor: {link}'
     with zipfile.ZipFile(ROOT/'docs/assets/reproducibility.zip') as bundle:
         assert bundle.testzip() is None
         names = bundle.namelist()
-        for required in ['README.md', 'requirements.txt', 'PRD.md', 'data/raw/online_shoppers_intention.csv', 'src/run_all.py', 'src/report_template.html', 'notebooks/01_data_and_reasoning.ipynb', 'notebooks/02_models_and_results.ipynb', 'results/test_predictions.csv', 'results/selection.json', '.github/workflows/pages.yml', 'scripts/verify_artifacts.py', 'docs/index.html']:
+        for required in ['README.md', 'requirements.txt', 'PRD.md', 'data/raw/online_shoppers_intention.csv', 'src/run_all.py', 'src/report_template.html', 'notebooks/01_data_and_reasoning.ipynb', 'notebooks/02_models_and_results.ipynb', 'results/test_predictions.csv', 'results/selection.json', '.github/workflows/pages.yml', 'scripts/verify_artifacts.py', 'docs/index.html', 'docs/research.html', 'docs/data/predictor.json', 'docs/predictor-engine.js', 'docs/workspace.js', 'src/predictor/train.py', 'results/predictor/selection.json']:
             assert required in names, f'Bundle missing {required}'
         assert not any(name.startswith('.venv/') or '/models/' in name for name in names)
     rerun = {}
@@ -53,7 +58,7 @@ def verify(compare_first=False):
             after = ROOT/'results'/f'{name}.csv'
             assert before.read_bytes() == after.read_bytes(), f'Deterministic rerun changed {name}'
             rerun[name] = hashlib.sha256(after.read_bytes()).hexdigest()
-    return {'local_asset_references_checked': len(local), 'unique_html_ids': len(parser.ids), 'zip_integrity': 'passed', 'rerun_byte_identical_results': rerun}
+    return {'local_asset_references_checked': len(local), 'unique_html_ids': total_ids, 'zip_integrity': 'passed', 'rerun_byte_identical_results': rerun}
 
 
 if __name__ == '__main__':

@@ -1,0 +1,13 @@
+{
+  "parity_records": 3703,
+  "constructed_new_sessions": 3,
+  "maximum_score_difference": 0,
+  "python_js_tolerance": 1e-12,
+  "explanation_sum": "passed",
+  "csv_quoting_validation_aliases_and_safe_export": "passed",
+  "large_batch": {
+    "rows": 10000,
+    "milliseconds": 230.1461
+  },
+  "status": "passed"
+}

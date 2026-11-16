@@ -16,7 +16,7 @@
 <header class="topbar">
   <a class="brand" href="#overview" aria-label="ShopperSense overview"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Shopper<span>Sense</span><span class="brand-dot">.</span></a>
   <span class="topbar-note">BROWSING BEHAVIOUR / PURCHASE INTENTION</span>
-  <a class="topbar-link" href="#reproduce">Code &amp; evidence <span aria-hidden="true">↗</span></a>
+  <a class="topbar-link" href="./">Predict new sessions <span aria-hidden="true">↗</span></a>
 </header>
 <div class="report-layout">
 <aside class="sidebar" aria-label="Report contents">
@@ -48,6 +48,7 @@
   <div class="answer-callout"><span class="callout-label">THE BRIEF ANSWER</span><p>{{brief_answer}}</p></div>
   <p class="provenance">GENERATED RUN <code>{{run_id}}</code><span>DATA SHA-256 <code>{{hash_prefix}}…</code></span><a href="data/summary.json">Machine-readable evidence ↗</a></p>
   <div class="scope-note"><strong>What one row means.</strong> A recorded browsing session; Revenue = 1 means purchase, 0 means no purchase. Inputs are session summaries, so these results do not establish early-session prediction. Associations within this dataset do not prove causes or conversion uplift.</div>
+  {{predictor_section}}
 </section>
 
 <section id="data" class="section">

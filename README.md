@@ -1,6 +1,33 @@
 # ShopperSense
 
-A reproducible undergraduate ML investigation and a complete static research report. The supplied specification is preserved in [PRD.md](PRD.md).
+A marketer-facing purchase prediction workspace backed by a reproducible ML study. The homepage accepts **new sessions through a form or CSV** and produces real model predictions and a downloadable, ranked review list. The research report is supporting evidence at [research.html](https://vivek-314.github.io/ShopperSense-study/research.html). The original specification is preserved in [PRD.md](PRD.md); the user's later request for a practical prediction tool expands that scope.
+
+## Use the prediction workspace
+
+Open [ShopperSense](https://vivek-314.github.io/ShopperSense-study/). No Python installation, server account, model selection or threshold adjustment is needed to use it.
+
+1. **Predict a session:** enter page counts, seconds in the three page categories, visitor type and weekend status. All eight inputs are explicit. Click **Predict purchase** for a Purchase predicted / No purchase predicted label, a signal score, model influences and a suggested review priority. Changing an input marks the old result stale until rescored.
+2. **Score a CSV:** download the blank template and add one row per new browsing session. Upload your CSV, inspect row validation, then score it. Results are sorted by score; filter the review list and download all rows with exact scores, labels, original row numbers and errors. Invalid rows are preserved without scores. Up to 10,000 rows / 5 MB are supported. Standard UCI column names also work; Revenue and extra columns do not affect predictions.
+3. **Review before acting:** predictions are uncertain. This separate easy-input model detected **187/286 buyers** on the historical test split but generated **526 false alarms**; **187/713 flagged sessions** purchased. Use it to experiment with review prioritisation, then validate on your own shop before automating campaign spend. A score of 30/100 is not a calibrated 30% purchase probability.
+
+All inference happens in the browser using an actual exported Random Forest. Input records and CSVs are not uploaded to a prediction server, stored in browser persistence, or added to training. The model file is downloaded once on page load. This is a deployable static application on GitHub Pages; it has no backend service that must remain running. It does **not** automatically connect to Shopify, GA4, a CRM or a live event stream. Export/mapping from your analytics is required. No website access or analytics credentials have been supplied for automatic collection.
+
+This product model uses exactly ProductRelated, ProductRelated_Duration, Informational, Informational_Duration, Administrative, Administrative_Duration, VisitorType and Weekend. It has **its own** evaluation: Random Forest, max_depth=8, min_samples_leaf=10, 150 trees; validation AP=0.316011, fixed threshold=0.20; test AP=0.299416, precision=0.262272, recall=0.653846, F1=0.374374. It excludes PageValues, bounce/exit rates and technical category codes. The stronger **0.726 AP research result below belongs to a different, full-feature model** and is not the workspace predictor's accuracy.
+
+The practical model reused the original stratified train/validation/test row IDs. Its training-only CV and validation decision were frozen before its test evaluation; the historical test split had already been used for the research study, so this is a separately specified secondary condition, not independent new external validation. Live/partial-session and cross-store performance remain unvalidated.
+
+Rebuild the real product model and verify browser inference:
+
+```bash
+python -m src.predictor.train
+node tests/check_predictor.cjs
+python -m pytest -q
+python -m src.report
+```
+
+`src.predictor.train` writes `docs/data/predictor.json`, `results/predictor/` (all CV candidates, frozen selection, unrounded predictions, separate test metrics, warnings and 3,703 parity cases), and explicit historical example CSV / blank template downloads. `src.report` regenerates `docs/research.html`, copies the workspace template to `docs/index.html`, and rebuilds the source bundle without overwriting the app with a research homepage. The original research pipeline (`python -m src.run_all`) remains reproducible. A full rebuild runs both the research pipeline and the predictor training command.
+
+The JavaScript engine supports programmatic browser use after loading the exported JSON: `ShopperPredictor.predict(session, modelArtifact)`. This function uses the eight canonical CSV field names. Its preprocessing, float32 tree comparisons and all 150 fitted trees are exported exactly. Tree path influences are grouped by original input and sum to the prediction minus the mean root score; they are path-dependent associations inside the model, not explanations of purchase motives. The Node parity check matched Python **exactly on all 3,703 cases**, including three constructed fresh sessions, and checked CSV quoting/aliases, invalid rows, formula-safe export, score decomposition and a 10,000-row batch. No forecast is obtained by looking up a customer in the dataset.
 
 **Question:** How well can recorded browsing-session characteristics identify sessions that end in a purchase, compared with always predicting no purchase?
 
@@ -8,7 +35,7 @@ One row is one historical browsing session; Revenue=1 means purchase. This study
 
 ## Start here
 
-The complete generated report is `docs/index.html`. Run from this repository's root directory (the directory containing this README):
+The application is `docs/index.html`; the full research report is `docs/research.html`. Run from this repository's root directory (the directory containing this README):
 
 ```powershell
 .venv\Scripts\python.exe -m http.server 8765 --bind 127.0.0.1 --directory docs
