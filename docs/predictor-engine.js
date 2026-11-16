@@ -4,7 +4,6 @@
   const aliases = {
     product_pages:['product_pages','ProductRelated'], product_seconds:['product_seconds','ProductRelated_Duration'],
     information_pages:['information_pages','Informational'], information_seconds:['information_seconds','Informational_Duration'],
-    account_pages:['account_pages','Administrative'], account_seconds:['account_seconds','Administrative_Duration'],
     visitor_type:['visitor_type','VisitorType'], weekend:['weekend','Weekend'], session_id:['session_id','SessionID','source_row_id']
   };
   function key(value) { return String(value).trim().toLowerCase().replace(/[^a-z0-9]/g,''); }
@@ -28,7 +27,7 @@
     const visitors={new:'New_Visitor',new_visitor:'New_Visitor','new visitor':'New_Visitor',returning:'Returning_Visitor',returning_visitor:'Returning_Visitor','returning visitor':'Returning_Visitor',other:'Other'};
     result.visitor_type=visitors[visitor];
     if(!result.visitor_type) errors.push({field:'visitor_type',message:'Choose New visitor, Returning visitor, or Other / unknown.'});
-    for(const [pages,seconds] of [['product_pages','product_seconds'],['information_pages','information_seconds'],['account_pages','account_seconds']]) {
+    for(const [pages,seconds] of [['product_pages','product_seconds'],['information_pages','information_seconds']]) {
       if(result[pages]===0&&result[seconds]>0) errors.push({field:seconds,message:'Time must be 0 when the matching page count is 0.'});
     }
     return {valid:errors.length===0,input:result,errors};
@@ -64,7 +63,7 @@
       base=roots/model.trees.length;
     }
     const flags=artifact.input_contract.filter(c=>c.name!=='weekend'&&data[c.name]>c.training_max).map(c=>`${c.label} exceeds the largest value seen in training (${c.training_max.toLocaleString()}). Treat the result with extra caution.`);
-    if(['product_pages','information_pages','account_pages'].every(field=>data[field]===0)) flags.push('No page activity was recorded in these categories. Check that the session export is complete.');
+    if(['product_pages','information_pages'].every(field=>data[field]===0)) flags.push('No page activity was recorded in these categories. Check that the session export is complete.');
     const near=Math.abs(score-artifact.threshold)<.03;
     return {input:data,purchase_score:score,predicted_label:score>=artifact.threshold?1:0,threshold:artifact.threshold,base_score:base,contributions,flags,near_boundary:near,model_version:artifact.run_id};
   }
@@ -125,7 +124,7 @@
     return /[",\n\r]/.test(text)?'"'+text.replace(/"/g,'""')+'"':text;
   }
   function exportCSV(rows) {
-    const fields=['session_id','row_number','status','predicted_purchase','purchase_score','review_priority','error','model_version','product_pages','product_seconds','information_pages','information_seconds','account_pages','account_seconds','visitor_type','weekend'];
+    const fields=['session_id','row_number','status','predicted_purchase','purchase_score','review_priority','error','model_version','product_pages','product_seconds','information_pages','information_seconds','visitor_type','weekend'];
     const lines=rows.map(row=>{
       const p=row.prediction;
       const values={...row.input,session_id:row.session_id,row_number:row.row_number,status:row.status,predicted_purchase:p?p.predicted_label:'',purchase_score:p?p.purchase_score:'',review_priority:p?(p.predicted_label?'Review first':'Review later'):'Fix inputs',error:row.error||'',model_version:p?p.model_version:''};

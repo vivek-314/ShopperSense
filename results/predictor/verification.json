@@ -7,7 +7,7 @@
   "csv_quoting_validation_aliases_and_safe_export": "passed",
   "large_batch": {
     "rows": 10000,
-    "milliseconds": 230.1461
+    "milliseconds": 191.96810000000002
   },
   "status": "passed"
 }

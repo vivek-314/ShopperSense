@@ -50,6 +50,8 @@ def verify(compare_first=False):
         names = bundle.namelist()
         for required in ['README.md', 'requirements.txt', 'PRD.md', 'data/raw/online_shoppers_intention.csv', 'src/run_all.py', 'src/report_template.html', 'notebooks/01_data_and_reasoning.ipynb', 'notebooks/02_models_and_results.ipynb', 'results/test_predictions.csv', 'results/selection.json', '.github/workflows/pages.yml', 'scripts/verify_artifacts.py', 'docs/index.html', 'docs/research.html', 'docs/data/predictor.json', 'docs/predictor-engine.js', 'docs/workspace.js', 'src/predictor/train.py', 'results/predictor/selection.json']:
             assert required in names, f'Bundle missing {required}'
+        for required in ['notebooks/03_six_input_models_step_by_step.ipynb', 'notebooks/README.md']:
+            assert required in names, f'Bundle missing submission notebook: {required}'
         assert not any(name.startswith('.venv/') or '/models/' in name for name in names)
     rerun = {}
     if compare_first:

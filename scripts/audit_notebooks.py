@@ -13,11 +13,11 @@ for path in (root/'notebooks').glob('0*.ipynb'):
         'executed_cells': sum(cell.execution_count is not None for cell in cells),
         'errors': sum(output.output_type == 'error' for cell in cells for output in cell.outputs),
     }
-assert len(audit) == 2
+assert set(audit) == {'01_data_and_reasoning.ipynb', '02_models_and_results.ipynb', '03_six_input_models_step_by_step.ipynb'}
 assert all(row['code_cells'] == row['executed_cells'] and row['errors'] == 0 for row in audit.values())
 record = root/'results/verification.json'
 verification = json.loads(record.read_text())
 verification['notebook_cell_audit'] = audit
-verification['notebooks']['notes'] = 'All code cells completed with zero error outputs. Windows selector fallback and local TCP notices were nonfatal; one final kernel teardown emitted a connection-reset notice after computation.'
+verification['notebooks']['notes'] = 'Three notebooks audited. The six-input submission notebook fits all four models in explicit cells and reproduces the deployed export. Earlier Windows selector/TCP and kernel teardown notices were nonfatal.'
 record.write_text(json.dumps(verification, indent=2), encoding='utf-8')
 print(json.dumps(audit, indent=2))

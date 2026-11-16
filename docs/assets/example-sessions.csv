@@ -1,6 +1,6 @@
-session_id,product_pages,product_seconds,information_pages,information_seconds,account_pages,account_seconds,weekend,visitor_type
-historical-example-1,339.0,16138.2908,3.0,62.25,5.0,39.5,0.0,Returning_Visitor
-historical-example-2,8.0,257.4,0.0,0.0,0.0,0.0,1.0,Returning_Visitor
-historical-example-3,3.0,227.5,0.0,0.0,0.0,0.0,0.0,Returning_Visitor
-historical-example-4,38.0,314.8333333,0.0,0.0,0.0,0.0,0.0,Returning_Visitor
-historical-example-5,27.0,187.0,0.0,0.0,0.0,0.0,0.0,Returning_Visitor
+session_id,product_pages,product_seconds,information_pages,information_seconds,weekend,visitor_type
+historical-example-1,339.0,16138.2908,3.0,62.25,0.0,Returning_Visitor
+historical-example-2,8.0,257.4,0.0,0.0,1.0,Returning_Visitor
+historical-example-3,3.0,227.5,0.0,0.0,0.0,Returning_Visitor
+historical-example-4,38.0,314.8333333,0.0,0.0,0.0,Returning_Visitor
+historical-example-5,27.0,187.0,0.0,0.0,0.0,Returning_Visitor

@@ -1,0 +1,18 @@
+{
+  "model": "Random Forest",
+  "threshold": 0.12,
+  "features": [
+    "ProductRelated",
+    "ProductRelated_Duration",
+    "Informational",
+    "Informational_Duration",
+    "Weekend",
+    "VisitorType"
+  ],
+  "parameters": {
+    "model__max_depth": 8,
+    "model__min_samples_leaf": 10
+  },
+  "frozen_at_utc": "2026-11-16T16:51:59.383667+00:00",
+  "purpose": "Notebook reproduction; no changes to the production decision"
+}

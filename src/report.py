@@ -224,16 +224,16 @@ def metric_table(records, caption):
 def predictor_evidence(docs):
     path = docs/'data/predictor.json'
     if not path.exists():
-        return '<p>The separate eight-input prediction workspace has not been generated yet.</p>'
+        return '<p>The separate six-input prediction workspace has not been generated yet.</p>'
     deployed = read_json(path)
     row = deployed['test_metrics']
-    rows = [{'model': deployed['model_name'], 'feature_set': 'eight_observable_inputs', 'partition': 'test', **row}]
+    rows = [{'model': deployed['model_name'], 'feature_set': 'six_observable_inputs', 'partition': 'test', **row}]
     return f'''<aside class="decision-box" id="workspace-model"><span class="eyebrow">THE DEPLOYED PREDICTION WORKSPACE IS A SEPARATE MODEL</span>
-<h3>Eight inputs for new sessions</h3><p>The <a href="./">prediction workspace</a> accepts individual inputs and CSV files from outside this dataset. It runs a separately trained {deployed['model_name']} using ProductRelated, ProductRelated_Duration, Informational, Informational_Duration, Administrative, Administrative_Duration, VisitorType and Weekend. No unshown features are filled with defaults. PageValues, bounce/exit rates and the technical category codes are excluded.</p>
+<h3>Six inputs for new sessions</h3><p>The <a href="./">prediction workspace</a> accepts individual inputs and CSV files from outside this dataset. It runs a separately trained {deployed['model_name']} using ProductRelated, ProductRelated_Duration, Informational, Informational_Duration, VisitorType and Weekend. Administrative and Administrative_Duration were removed from the deployed predictor at the user’s request. Their earlier eight-input results are archived for a measured comparison. No unshown features are filled with defaults. PageValues, bounce/exit rates and the technical category codes are excluded.</p>
 <p>This product model's test AP is <strong>{row['ap']:.3f}</strong>, compared with the full-feature research result shown above. Its frozen validation-selected threshold is {deployed['threshold']:.2f}. It found {row['tp']} of {row['purchases']} actual buyers, with {row['fp']} false alarms among {row['predicted_purchases']} flagged sessions. Its score is an uncalibrated model output, not a guaranteed purchase probability. The original benchmark's stronger metrics must never be attributed to this predictor.</p>
 <p>All three classifiers were tuned on the original training rows with the same bounded three-fold AP searches. Validation selected the model and threshold before this condition's test evaluation. The historical test split is reused from the research project, not an independent external validation. New stores, future sessions and early-session use remain unvalidated.</p>
 <p>Python/JavaScript parity is checked on all 3,700 validation/test rows and three constructed fresh sessions. Forest inference uses the fitted numeric/category preprocessing and float32 tree comparisons. Signed path contributions sum to score minus the mean root score; they are model attributions, not causal effects.</p>
-<p>Product version: <code>{deployed['run_id']}</code>. Its complete CV, selection, predictions and metrics are in <code>results/predictor/</code> in the downloadable source bundle.</p></aside>'''+metric_table(rows, 'Deployed eight-input predictor · its own final test performance')
+<p>Product version: <code>{deployed['run_id']}</code>. Its complete CV, selection, predictions and metrics are in <code>results/predictor/</code> in the downloadable source bundle.</p></aside>'''+metric_table(rows, 'Deployed six-input predictor · its own final test performance')
 
 
 def model_comparison_text(summary, best_test, selected):

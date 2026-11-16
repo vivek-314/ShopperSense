@@ -1,25 +1,24 @@
 {
-  "checked_utc": "2026-11-16T16:12:06.574411+00:00",
-  "model_version": "predictor-b3055ee3-ce5f3a6a",
-  "manual_new_input_positive": {
-    "python_score": 0.3035895688591705,
-    "browser_display": "30.4 / 100",
-    "prediction": "Purchase predicted"
+  "checked_utc": "2026-11-16T16:56:22.092308+00:00",
+  "run_id": "predictor-b3055ee3-4cb83771",
+  "six_required_inputs": true,
+  "account_fields_visible": 0,
+  "fresh_input_python_score": 0.2332711519011321,
+  "fresh_input_browser_display": "23.3 / 100",
+  "fresh_input_prediction": "Purchase predicted",
+  "csv_historical_examples": {
+    "rows": 5,
+    "valid": 5,
+    "scored": 5,
+    "purchase_predicted": 1,
+    "no_purchase_predicted": 4
   },
-  "manual_new_input_negative": {
-    "python_score": 0.005086430313631755,
-    "browser_display": "0.5 / 100",
-    "prediction": "No purchase predicted"
+  "model_inputs_exclude_administrative": true,
+  "notebook": {
+    "path": "notebooks/03_six_input_models_step_by_step.ipynb",
+    "code_cells": 20,
+    "executed_cells": 20,
+    "error_outputs": 0
   },
-  "required_fields": "8 blank required inputs rejected; no hidden defaults",
-  "stale_input": "old result marked stale; export disabled until rescored",
-  "single_download": "downloaded file inspected; exact score 0.005086430313631755 and correct label/inputs",
-  "external_csv": "QA file uploaded through browser: 3 sessions, 2 scored, 1 invalid; positive and negative scores match Python; invalid row retained without score; filter passed",
-  "historical_examples": "5 valid explicitly labelled historical rows; manual example fills every required input",
-  "keyboard_mode_navigation": "ArrowLeft from CSV tab activates single-session tab",
-  "mobile": "390x844 viewport; document width 375; no page-wide overflow; result and CSV review visually checked",
-  "missing_model": "isolated absent-model copy explains failure and disables predictions; no fallback scores",
-  "console_errors": 0,
-  "qa_inputs_are_not_training_data": true,
-  "publication": "pending updated Pages workflow"
+  "publication": "Local checks before updated Pages deployment"
 }

@@ -21,7 +21,7 @@
   "notebooks": {
     "01_data_and_reasoning": "executed top to bottom",
     "02_models_and_results": "executed top to bottom",
-    "notes": "All code cells completed with zero error outputs. Windows selector fallback and local TCP notices were nonfatal; one final kernel teardown emitted a connection-reset notice after computation."
+    "notes": "Three notebooks audited. The six-input submission notebook fits all four models in explicit cells and reproduces the deployed export. Earlier Windows selector/TCP and kernel teardown notices were nonfatal."
   },
   "browser": {
     "desktop": "passed at default 1101px viewport",
@@ -55,6 +55,11 @@
     "02_models_and_results.ipynb": {
       "code_cells": 9,
       "executed_cells": 9,
+      "errors": 0
+    },
+    "03_six_input_models_step_by_step.ipynb": {
+      "code_cells": 20,
+      "executed_cells": 20,
       "errors": 0
     }
   }

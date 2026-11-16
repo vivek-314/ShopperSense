@@ -4,8 +4,8 @@
   const form=$('session-form'), tabs=[...document.querySelectorAll('[role=tab]')];
   let artifact=null, singleResult=null, imported=null, bulkRows=[], page=0, generation=0, historicalSingle=false;
   const PAGE_SIZE=50;
-  const fieldIds={product_pages:'product-pages',product_seconds:'product-seconds',information_pages:'information-pages',information_seconds:'information-seconds',account_pages:'account-pages',account_seconds:'account-seconds',visitor_type:'visitor-type',weekend:'weekend'};
-  const labels={product_pages:'Product pages viewed',product_seconds:'Time on product pages',information_pages:'Information pages viewed',information_seconds:'Time on information pages',account_pages:'Account / admin pages viewed',account_seconds:'Time on account / admin pages',visitor_type:'Visitor type',weekend:'Weekend visit'};
+  const fieldIds={product_pages:'product-pages',product_seconds:'product-seconds',information_pages:'information-pages',information_seconds:'information-seconds',visitor_type:'visitor-type',weekend:'weekend'};
+  const labels={product_pages:'Product pages viewed',product_seconds:'Time on product pages',information_pages:'Information pages viewed',information_seconds:'Time on information pages',visitor_type:'Visitor type',weekend:'Weekend visit'};
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function showMessage(id,text) {$(id).textContent=text;$(id).hidden=!text;}
   function switchMode(mode,focus=false) {
@@ -112,7 +112,7 @@
       }
       imported=parsed;$('csv-preview').hidden=false;$('csv-filename').textContent=name;
       $('csv-preview-summary').textContent=`${parsed.records.length.toLocaleString()} sessions · ${(parsed.records.length-invalid.length).toLocaleString()} valid · ${invalid.length.toLocaleString()} need fixes`;
-      $('csv-column-note').textContent=`All eight input columns recognised.${parsed.ignored_columns.length?' Extra columns ignored: '+parsed.ignored_columns.join(', ')+'.':' No hidden input values will be added.'}`;
+      $('csv-column-note').textContent=`All six input columns recognised.${parsed.ignored_columns.length?' Extra columns ignored: '+parsed.ignored_columns.join(', ')+'.':' No hidden input values will be added.'}`;
       $('csv-example-note').hidden=!historical;
       showMessage('csv-validation',invalid.length?`${invalid.length} row(s) need input fixes. Valid rows can still be scored; invalid rows remain in the result with no score. ${invalid.slice(0,3).join(' ')}${invalid.length>3?' Further errors will be included in the result download.':''}`:'');
     } catch(error) {showMessage('csv-error',error.message);}
@@ -164,16 +164,16 @@
   $('download-bulk').addEventListener('click',()=>{if(bulkRows.length) download('shoppersense-session-predictions.csv',engine.exportCSV(bulkRows));});
   async function loadModel() {
     try {
-      const response=await fetch('data/predictor.json');if(!response.ok) throw new Error('Model HTTP '+response.status);
+      const response=await fetch('data/predictor.json?v=6');if(!response.ok) throw new Error('Model HTTP '+response.status);
       const data=await response.json();
-      if(data.schema_version!==1||data.feature_set!=='eight_observable_inputs'||!data.inference||!data.test_metrics||!Array.isArray(data.input_contract)||data.input_contract.length!==7||!Number.isFinite(data.threshold)||data.threshold<0||data.threshold>1) throw new Error('Model format is invalid.');
+      if(data.schema_version!==2||data.feature_set!=='six_observable_inputs'||!data.inference||!data.test_metrics||!Array.isArray(data.input_contract)||data.input_contract.length!==5||!Number.isFinite(data.threshold)||data.threshold<0||data.threshold>1) throw new Error('Model format is invalid.');
       artifact=data;
       const t=data.test_metrics;
       $('model-status').textContent='Ready to score your own sessions · Experimental model trained on historical browsing data · No automatic store connection';
       ['predict-button','load-example','load-csv-example'].forEach(id=>$(id).disabled=false);
       $('reliability-found').textContent=`${t.tp} / ${t.purchases}`;$('reliability-flagged').textContent=`${t.tp} / ${t.predicted_purchases}`;
       $('reliability-copy').textContent=`Of ${t.support.toLocaleString()} historical test sessions, the model found ${t.tp} of ${t.purchases} purchases and missed ${t.fn}. It also flagged ${t.fp} sessions that did not purchase. These false alarms make human review essential.`;
-      $('model-details').textContent=`${data.model_name}, fitted on ${data.trained_on.toLocaleString()} training sessions with exactly eight inputs. The fixed ${data.threshold.toFixed(2)} score cutoff was selected on validation F1 before this condition’s test evaluation. Its test AP is ${t.ap.toFixed(3)}. It is a separate model from the full-feature research benchmark. Version ${data.run_id}.`;
+      $('model-details').textContent=`${data.model_name}, fitted on ${data.trained_on.toLocaleString()} training sessions with exactly six inputs. The fixed ${data.threshold.toFixed(2)} score cutoff was selected on validation F1 before this condition’s test evaluation. Its test AP is ${t.ap.toFixed(3)}. It is a separate model from the full-feature research benchmark. Version ${data.run_id}.`;
       $('footer-version').textContent=data.run_id;
     } catch(error) {
       artifact=null;$('model-status').classList.add('error');$('model-status').textContent='The trained model could not be loaded. Reload the page or check your connection. Predictions are disabled; no substitute scores are generated.';console.error('Prediction model unavailable:',error.message);

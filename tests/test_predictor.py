@@ -21,9 +21,9 @@ def test_product_model_has_only_observable_explicit_inputs():
     model=read('docs/data/predictor.json')
     selection=read('results/predictor/selection.json')
     assert selection['features']==FEATURES
-    assert len(FEATURES)==8
-    assert not {'Revenue','PageValues','BounceRates','ExitRates','source_row_id'} & set(FEATURES)
-    assert model['feature_set']=='eight_observable_inputs'
+    assert len(FEATURES)==6
+    assert not {'Administrative','Administrative_Duration','Revenue','PageValues','BounceRates','ExitRates','source_row_id'} & set(FEATURES)
+    assert model['feature_set']=='six_observable_inputs'
     assert model['run_id']==selection['run_id']
     assert model['data_sha256']==read('results/splits.json')['source_sha256']
 
@@ -68,3 +68,5 @@ def test_product_scores_stable_order_and_export_fixtures():
     index=(ROOT/'docs/index.html').read_text(encoding='utf-8')
     assert 'session-form' in index and 'csv-file' in index
     assert 'research.html' in index
+    assert 'name="account_pages"' not in index and 'name="account_seconds"' not in index
+    assert '03_six_input_models_step_by_step.ipynb' in index

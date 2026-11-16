@@ -1,4 +1,4 @@
-"""Train the eight-input product model, freeze its decision, and export real JS inference.
+"""Train the six-input product model, freeze its decision, and export real JS inference.
 
 Run: python -m src.predictor.train
 Original research results are preserved. This is a new, separately labelled condition.
@@ -31,8 +31,6 @@ FIELDS = [
     ('product_seconds', 'ProductRelated_Duration', 'Time on product pages', False),
     ('information_pages', 'Informational', 'Information pages viewed', True),
     ('information_seconds', 'Informational_Duration', 'Time on information pages', False),
-    ('account_pages', 'Administrative', 'Account / admin pages viewed', True),
-    ('account_seconds', 'Administrative_Duration', 'Time on account / admin pages', False),
     ('weekend', 'Weekend', 'Weekend visit', True),
 ]
 NUMERIC = [field[1] for field in FIELDS]
@@ -96,7 +94,7 @@ def run():
     models, records, cv_frames, warnings_log = {}, [], [], []
     parameters = {}
     for name, (estimator, grid) in definitions().items():
-        print(f'Training eight-input model: {name}', flush=True)
+        print(f'Training six-input model: {name}', flush=True)
         model = Pipeline([('preprocess', preprocess(name == 'Logistic Regression')), ('model', estimator)])
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
@@ -117,7 +115,7 @@ def run():
         models[name] = model
         parameters[name] = params
         scores = model.predict_proba(frame.loc[ids['validation'], FEATURES])[:, 1]
-        records.append({'model': name, 'feature_set': 'full', 'condition': 'eight_observable_inputs', 'partition': 'validation', **metrics(frame.loc[ids['validation'], 'Revenue'], scores)})
+        records.append({'model': name, 'feature_set': 'full', 'condition': 'six_observable_inputs', 'partition': 'validation', **metrics(frame.loc[ids['validation'], 'Revenue'], scores)})
         print(f'  validation AP {records[-1]["ap"]:.6f}', flush=True)
     selected = choose_model(records)
     validation_scores = models[selected].predict_proba(frame.loc[ids['validation'], FEATURES])[:, 1]
@@ -130,7 +128,7 @@ def run():
     frozen = {
         'run_id': run_id, 'source_code_sha256': code_hash, 'data_sha256': source_hash,
         'model': selected, 'threshold': threshold, 'parameters': parameters[selected],
-        'features': FEATURES, 'public_fields': list(FIELD_BY_SOURCE.values()), 'feature_set': 'eight_observable_inputs',
+        'features': FEATURES, 'public_fields': list(FIELD_BY_SOURCE.values()), 'feature_set': 'six_observable_inputs',
         'frozen_at_utc': datetime.now(timezone.utc).isoformat(),
         'selection_rule': 'Training-only 3-fold AP grid search; highest validation AP with 0.005 simplicity tolerance (LR, Tree, Forest). Threshold maximizes validation F1 on 0.05..0.95, ties prefer higher.',
         'test_status': 'Same historical research split reused for this separately specified condition; not an independent new external validation. No product-model tuning from test.',
@@ -146,7 +144,7 @@ def run():
     for name, model in models.items():
         scores = model.predict_proba(frame.loc[ids['test'], FEATURES])[:, 1]
         for cut in ([.5, threshold] if name == selected and threshold != .5 else [.5]):
-            tests.append({'model': name, 'feature_set': 'eight_observable_inputs', 'partition': 'test', **metrics(frame.loc[ids['test'], 'Revenue'], scores, cut)})
+            tests.append({'model': name, 'feature_set': 'six_observable_inputs', 'partition': 'test', **metrics(frame.loc[ids['test'], 'Revenue'], scores, cut)})
     fitted = models[selected]
     for partition in ['train', 'validation', 'test']:
         scores = fitted.predict_proba(frame.loc[ids[partition], FEATURES])[:, 1]
@@ -161,13 +159,13 @@ def run():
         observed = train[source]
         numeric_contract.append({'name': public, 'source': source, 'label': label, 'integer': integer, 'min': 0, 'training_min': float(observed.min()), 'training_max': float(observed.max()), 'training_median': float(observed.median()), 'training_p99': float(observed.quantile(.99))})
     payload = {
-        'schema_version': 1, 'run_id': run_id, 'data_sha256': source_hash, 'model_name': selected,
-        'feature_set': 'eight_observable_inputs', 'threshold': threshold, 'trained_on': len(train),
+        'schema_version': 2, 'run_id': run_id, 'data_sha256': source_hash, 'model_name': selected,
+        'feature_set': 'six_observable_inputs', 'threshold': threshold, 'trained_on': len(train),
         'input_contract': numeric_contract, 'visitor_types': ['New_Visitor', 'Returning_Visitor', 'Other'],
         'inference': export_model(fitted), 'validation_metrics': metrics(frame.loc[ids['validation'], 'Revenue'], validation_scores, threshold),
         'test_metrics': official, 'test_baseline': next(r for r in tests if r['model'] == 'Dummy'),
         'source': 'https://doi.org/10.24432/C5F88Q',
-        'limits': 'Historical session summaries, not validated early-session or cross-store performance. Eight-input scores are not calibrated purchase probabilities. Imported/new sessions are scored, not used for retraining. No automatic analytics connection.',
+        'limits': 'Historical session summaries, not validated early-session or cross-store performance. Six-input scores are not calibrated purchase probabilities. Imported/new sessions are scored, not used for retraining. No automatic analytics connection.',
         'explanation_method': 'Trees: average changes in purchase proportion along each actual decision path, grouped by original input; contributions sum to the score minus root average. Path-dependent model attribution, not a causal explanation. Logistic: signed contributions in log odds.',
     }
     write_json(ROOT/'docs/data/predictor.json', payload)
@@ -178,9 +176,9 @@ def run():
         scores = fitted.predict_proba(data)[:, 1]
         fixture_rows.extend({'name': f'{partition}:{idx}', 'input': to_public(row), 'score': float(score)} for (idx, row), score in zip(data.iterrows(), scores))
     new_inputs = [
-        {'product_pages': 7, 'product_seconds': 311, 'information_pages': 2, 'information_seconds': 55, 'account_pages': 1, 'account_seconds': 31, 'weekend': 1, 'visitor_type': 'New_Visitor'},
-        {'product_pages': 43, 'product_seconds': 1567.25, 'information_pages': 3, 'information_seconds': 110.5, 'account_pages': 4, 'account_seconds': 80.5, 'weekend': 0, 'visitor_type': 'Returning_Visitor'},
-        {'product_pages': 0, 'product_seconds': 0, 'information_pages': 0, 'information_seconds': 0, 'account_pages': 1, 'account_seconds': 20, 'weekend': 0, 'visitor_type': 'Other'},
+        {'product_pages': 7, 'product_seconds': 311, 'information_pages': 2, 'information_seconds': 55, 'weekend': 1, 'visitor_type': 'New_Visitor'},
+        {'product_pages': 43, 'product_seconds': 1567.25, 'information_pages': 3, 'information_seconds': 110.5, 'weekend': 0, 'visitor_type': 'Returning_Visitor'},
+        {'product_pages': 0, 'product_seconds': 0, 'information_pages': 0, 'information_seconds': 0, 'weekend': 0, 'visitor_type': 'Other'},
     ]
     for n, public in enumerate(new_inputs):
         values = {source: public[FIELD_BY_SOURCE[source]] for source in FEATURES}

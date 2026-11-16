@@ -1,0 +1,1 @@
+Previous eight-input predictor, preserved before removing Administrative and Administrative_Duration. Source commit: 9ad77f60c521f00594f67e767b966bf1428b7cb4. Same saved train/validation/test row IDs; the new six-input condition must be evaluated separately. These records are historical, not the deployed model.
