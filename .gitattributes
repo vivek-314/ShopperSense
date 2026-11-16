@@ -1,0 +1,15 @@
+# Preserve raw-byte provenance and round-trip result artifacts on every platform.
+data/raw/*.csv -text
+results/*.csv -text
+results/*.json text eol=lf
+*.py text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.cjs text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.ipynb text eol=lf
+*.svg text eol=lf
+*.png binary
+*.zip binary

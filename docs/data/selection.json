@@ -1,0 +1,191 @@
+{
+  "run_id": "ss-b3055ee3-c246965f",
+  "source_code_sha256": "c246965fe7350298c94c4ebe0ea2a6ab9fe0609e4019995d27148c1148afed8e",
+  "data_sha256": "b3055ee355f59134d851d32641183cb4a8b45def7124d2f50442a042f358e0d9",
+  "frozen_at_utc": "2026-11-16T14:37:44.863488+00:00",
+  "selected_model": "Random Forest",
+  "feature_set": "full",
+  "selected_parameters": {
+    "model__max_depth": null,
+    "model__min_samples_leaf": 2
+  },
+  "threshold": 0.24,
+  "model_rule": "Highest validation AP; within 0.005 of highest, prefer Logistic Regression, Decision Tree, Random Forest in that order. Dummy excluded.",
+  "threshold_rule": "Maximize validation purchase F1 on 0.05..0.95 by 0.01, ties use larger threshold. Illustrative balance; no known cost ratio.",
+  "validation_evidence": [
+    {
+      "model": "Dummy",
+      "feature_set": "full",
+      "partition": "validation",
+      "threshold": 0.5,
+      "support": 1850,
+      "purchases": 286,
+      "predicted_purchases": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "ap": 0.1545945945945946,
+      "roc_auc": 0.5,
+      "accuracy": 0.8454054054054054,
+      "tn": 1564,
+      "fp": 0,
+      "fn": 286,
+      "tp": 0,
+      "precision_defined": false,
+      "recall_defined": true
+    },
+    {
+      "model": "Logistic Regression",
+      "feature_set": "full",
+      "partition": "validation",
+      "threshold": 0.5,
+      "support": 1850,
+      "purchases": 286,
+      "predicted_purchases": 139,
+      "precision": 0.7338129496402878,
+      "recall": 0.35664335664335667,
+      "f1": 0.48,
+      "ap": 0.6485117505755925,
+      "roc_auc": 0.8939557884570672,
+      "accuracy": 0.8805405405405405,
+      "tn": 1527,
+      "fp": 37,
+      "fn": 184,
+      "tp": 102,
+      "precision_defined": true,
+      "recall_defined": true
+    },
+    {
+      "model": "Decision Tree",
+      "feature_set": "full",
+      "partition": "validation",
+      "threshold": 0.5,
+      "support": 1850,
+      "purchases": 286,
+      "predicted_purchases": 195,
+      "precision": 0.7384615384615385,
+      "recall": 0.5034965034965035,
+      "f1": 0.5987525987525988,
+      "ap": 0.6840438605662496,
+      "roc_auc": 0.9124208591919589,
+      "accuracy": 0.8956756756756756,
+      "tn": 1513,
+      "fp": 51,
+      "fn": 142,
+      "tp": 144,
+      "precision_defined": true,
+      "recall_defined": true
+    },
+    {
+      "model": "Random Forest",
+      "feature_set": "full",
+      "partition": "validation",
+      "threshold": 0.5,
+      "support": 1850,
+      "purchases": 286,
+      "predicted_purchases": 170,
+      "precision": 0.7941176470588235,
+      "recall": 0.47202797202797203,
+      "f1": 0.5921052631578947,
+      "ap": 0.7254373691936357,
+      "roc_auc": 0.9198039811850554,
+      "accuracy": 0.8994594594594595,
+      "tn": 1529,
+      "fp": 35,
+      "fn": 151,
+      "tp": 135,
+      "precision_defined": true,
+      "recall_defined": true
+    },
+    {
+      "model": "Logistic Regression",
+      "feature_set": "no_PageValues",
+      "partition": "validation",
+      "threshold": 0.5,
+      "support": 1850,
+      "purchases": 286,
+      "predicted_purchases": 14,
+      "precision": 0.42857142857142855,
+      "recall": 0.02097902097902098,
+      "f1": 0.04,
+      "ap": 0.3133126003481851,
+      "roc_auc": 0.7563357358753778,
+      "accuracy": 0.8443243243243244,
+      "tn": 1556,
+      "fp": 8,
+      "fn": 280,
+      "tp": 6,
+      "precision_defined": true,
+      "recall_defined": true
+    },
+    {
+      "model": "Random Forest",
+      "feature_set": "no_PageValues",
+      "partition": "validation",
+      "threshold": 0.5,
+      "support": 1850,
+      "purchases": 286,
+      "predicted_purchases": 26,
+      "precision": 0.7307692307692307,
+      "recall": 0.06643356643356643,
+      "f1": 0.12179487179487179,
+      "ap": 0.37662148377903887,
+      "roc_auc": 0.7598858941569939,
+      "accuracy": 0.8518918918918919,
+      "tn": 1557,
+      "fp": 7,
+      "fn": 267,
+      "tp": 19,
+      "precision_defined": true,
+      "recall_defined": true
+    }
+  ],
+  "feature_condition": "Full features are prespecified primary; no-PageValues LR/RF are secondary and not selection candidates.",
+  "training_policy": "All models fitted only on training; no refit on validation after selection.",
+  "duplicate_sensitivity_policy": "20 stratified group folds: 14 train, 3 validation, 3 test; identical predictor hashes kept together. Approximate 70/15/15; secondary only. Frozen primary hyperparameters and threshold reused; no group-test tuning.",
+  "frozen_variants": [
+    {
+      "model": "Dummy",
+      "feature_set": "full",
+      "parameters": {}
+    },
+    {
+      "model": "Logistic Regression",
+      "feature_set": "full",
+      "parameters": {
+        "model__C": 0.1
+      }
+    },
+    {
+      "model": "Decision Tree",
+      "feature_set": "full",
+      "parameters": {
+        "model__max_depth": 5,
+        "model__min_samples_leaf": 20
+      }
+    },
+    {
+      "model": "Random Forest",
+      "feature_set": "full",
+      "parameters": {
+        "model__max_depth": null,
+        "model__min_samples_leaf": 2
+      }
+    },
+    {
+      "model": "Logistic Regression",
+      "feature_set": "no_PageValues",
+      "parameters": {
+        "model__C": 0.1
+      }
+    },
+    {
+      "model": "Random Forest",
+      "feature_set": "no_PageValues",
+      "parameters": {
+        "model__max_depth": null,
+        "model__min_samples_leaf": 2
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+.venv/
+.tmp/
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+notebooks/executed_*.ipynb
+results/models/
+results/browser-qa/
+*.log
+/online_shoppers_intention.csv

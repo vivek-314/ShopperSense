@@ -1,0 +1,659 @@
+{
+  "Dummy/full": {
+    "selected_grid_params": {},
+    "estimator_params": {
+      "constant": null,
+      "random_state": 42,
+      "strategy": "most_frequent"
+    },
+    "numeric_features": [
+      "Administrative",
+      "Administrative_Duration",
+      "Informational",
+      "Informational_Duration",
+      "ProductRelated",
+      "ProductRelated_Duration",
+      "BounceRates",
+      "ExitRates",
+      "PageValues",
+      "SpecialDay",
+      "Weekend"
+    ],
+    "categorical_vocabulary": [
+      [
+        "Aug",
+        "Dec",
+        "Feb",
+        "Jul",
+        "June",
+        "Mar",
+        "May",
+        "Nov",
+        "Oct",
+        "Sep"
+      ],
+      [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "18",
+        "19",
+        "2",
+        "20",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "New_Visitor",
+        "Other",
+        "Returning_Visitor"
+      ]
+    ]
+  },
+  "Logistic Regression/full": {
+    "selected_grid_params": {
+      "model__C": 0.1
+    },
+    "estimator_params": {
+      "C": 0.1,
+      "class_weight": null,
+      "dual": false,
+      "fit_intercept": true,
+      "intercept_scaling": 1,
+      "l1_ratio": 0.0,
+      "max_iter": 2000,
+      "n_jobs": null,
+      "penalty": "deprecated",
+      "random_state": 42,
+      "solver": "lbfgs",
+      "tol": 0.0001,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "numeric_features": [
+      "Administrative",
+      "Administrative_Duration",
+      "Informational",
+      "Informational_Duration",
+      "ProductRelated",
+      "ProductRelated_Duration",
+      "BounceRates",
+      "ExitRates",
+      "PageValues",
+      "SpecialDay",
+      "Weekend"
+    ],
+    "categorical_vocabulary": [
+      [
+        "Aug",
+        "Dec",
+        "Feb",
+        "Jul",
+        "June",
+        "Mar",
+        "May",
+        "Nov",
+        "Oct",
+        "Sep"
+      ],
+      [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "18",
+        "19",
+        "2",
+        "20",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "New_Visitor",
+        "Other",
+        "Returning_Visitor"
+      ]
+    ]
+  },
+  "Decision Tree/full": {
+    "selected_grid_params": {
+      "model__max_depth": 5,
+      "model__min_samples_leaf": 20
+    },
+    "estimator_params": {
+      "ccp_alpha": 0.0,
+      "class_weight": null,
+      "criterion": "gini",
+      "max_depth": 5,
+      "max_features": null,
+      "max_leaf_nodes": null,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 20,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "random_state": 42,
+      "splitter": "best"
+    },
+    "numeric_features": [
+      "Administrative",
+      "Administrative_Duration",
+      "Informational",
+      "Informational_Duration",
+      "ProductRelated",
+      "ProductRelated_Duration",
+      "BounceRates",
+      "ExitRates",
+      "PageValues",
+      "SpecialDay",
+      "Weekend"
+    ],
+    "categorical_vocabulary": [
+      [
+        "Aug",
+        "Dec",
+        "Feb",
+        "Jul",
+        "June",
+        "Mar",
+        "May",
+        "Nov",
+        "Oct",
+        "Sep"
+      ],
+      [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "18",
+        "19",
+        "2",
+        "20",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "New_Visitor",
+        "Other",
+        "Returning_Visitor"
+      ]
+    ]
+  },
+  "Random Forest/full": {
+    "selected_grid_params": {
+      "model__max_depth": null,
+      "model__min_samples_leaf": 2
+    },
+    "estimator_params": {
+      "bootstrap": true,
+      "ccp_alpha": 0.0,
+      "class_weight": null,
+      "criterion": "gini",
+      "max_depth": null,
+      "max_features": "sqrt",
+      "max_leaf_nodes": null,
+      "max_samples": null,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 2,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "n_estimators": 150,
+      "n_jobs": 1,
+      "oob_score": false,
+      "random_state": 42,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "numeric_features": [
+      "Administrative",
+      "Administrative_Duration",
+      "Informational",
+      "Informational_Duration",
+      "ProductRelated",
+      "ProductRelated_Duration",
+      "BounceRates",
+      "ExitRates",
+      "PageValues",
+      "SpecialDay",
+      "Weekend"
+    ],
+    "categorical_vocabulary": [
+      [
+        "Aug",
+        "Dec",
+        "Feb",
+        "Jul",
+        "June",
+        "Mar",
+        "May",
+        "Nov",
+        "Oct",
+        "Sep"
+      ],
+      [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "18",
+        "19",
+        "2",
+        "20",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "New_Visitor",
+        "Other",
+        "Returning_Visitor"
+      ]
+    ]
+  },
+  "Logistic Regression/no_PageValues": {
+    "selected_grid_params": {
+      "model__C": 0.1
+    },
+    "estimator_params": {
+      "C": 0.1,
+      "class_weight": null,
+      "dual": false,
+      "fit_intercept": true,
+      "intercept_scaling": 1,
+      "l1_ratio": 0.0,
+      "max_iter": 2000,
+      "n_jobs": null,
+      "penalty": "deprecated",
+      "random_state": 42,
+      "solver": "lbfgs",
+      "tol": 0.0001,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "numeric_features": [
+      "Administrative",
+      "Administrative_Duration",
+      "Informational",
+      "Informational_Duration",
+      "ProductRelated",
+      "ProductRelated_Duration",
+      "BounceRates",
+      "ExitRates",
+      "SpecialDay",
+      "Weekend"
+    ],
+    "categorical_vocabulary": [
+      [
+        "Aug",
+        "Dec",
+        "Feb",
+        "Jul",
+        "June",
+        "Mar",
+        "May",
+        "Nov",
+        "Oct",
+        "Sep"
+      ],
+      [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "18",
+        "19",
+        "2",
+        "20",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "New_Visitor",
+        "Other",
+        "Returning_Visitor"
+      ]
+    ]
+  },
+  "Random Forest/no_PageValues": {
+    "selected_grid_params": {
+      "model__max_depth": null,
+      "model__min_samples_leaf": 2
+    },
+    "estimator_params": {
+      "bootstrap": true,
+      "ccp_alpha": 0.0,
+      "class_weight": null,
+      "criterion": "gini",
+      "max_depth": null,
+      "max_features": "sqrt",
+      "max_leaf_nodes": null,
+      "max_samples": null,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 2,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "n_estimators": 150,
+      "n_jobs": 1,
+      "oob_score": false,
+      "random_state": 42,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "numeric_features": [
+      "Administrative",
+      "Administrative_Duration",
+      "Informational",
+      "Informational_Duration",
+      "ProductRelated",
+      "ProductRelated_Duration",
+      "BounceRates",
+      "ExitRates",
+      "SpecialDay",
+      "Weekend"
+    ],
+    "categorical_vocabulary": [
+      [
+        "Aug",
+        "Dec",
+        "Feb",
+        "Jul",
+        "June",
+        "Mar",
+        "May",
+        "Nov",
+        "Oct",
+        "Sep"
+      ],
+      [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8"
+      ],
+      [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "18",
+        "19",
+        "2",
+        "20",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ],
+      [
+        "New_Visitor",
+        "Other",
+        "Returning_Visitor"
+      ]
+    ]
+  }
+}

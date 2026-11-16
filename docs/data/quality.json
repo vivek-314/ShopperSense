@@ -1,0 +1,294 @@
+{
+  "scope": "Whole-file structural audit; exploratory choices use training only.",
+  "missing_by_column": {
+    "Administrative": 0,
+    "Administrative_Duration": 0,
+    "Informational": 0,
+    "Informational_Duration": 0,
+    "ProductRelated": 0,
+    "ProductRelated_Duration": 0,
+    "BounceRates": 0,
+    "ExitRates": 0,
+    "PageValues": 0,
+    "SpecialDay": 0,
+    "Month": 0,
+    "OperatingSystems": 0,
+    "Browser": 0,
+    "Region": 0,
+    "TrafficType": 0,
+    "VisitorType": 0,
+    "Weekend": 0,
+    "Revenue": 0
+  },
+  "nonfinite_by_numeric_column": {
+    "Administrative": 0,
+    "Administrative_Duration": 0,
+    "Informational": 0,
+    "Informational_Duration": 0,
+    "ProductRelated": 0,
+    "ProductRelated_Duration": 0,
+    "BounceRates": 0,
+    "ExitRates": 0,
+    "PageValues": 0,
+    "SpecialDay": 0,
+    "Weekend": 0
+  },
+  "negative_by_numeric_column": {
+    "Administrative": 0,
+    "Administrative_Duration": 0,
+    "Informational": 0,
+    "Informational_Duration": 0,
+    "ProductRelated": 0,
+    "ProductRelated_Duration": 0,
+    "BounceRates": 0,
+    "ExitRates": 0,
+    "PageValues": 0,
+    "SpecialDay": 0,
+    "Weekend": 0
+  },
+  "outside_unit_interval": {
+    "BounceRates": 0,
+    "ExitRates": 0,
+    "SpecialDay": 0,
+    "Weekend": 0
+  },
+  "noninteger_counts": {
+    "Administrative": 0,
+    "Informational": 0,
+    "ProductRelated": 0
+  },
+  "categories": {
+    "Month": [
+      "Aug",
+      "Dec",
+      "Feb",
+      "Jul",
+      "June",
+      "Mar",
+      "May",
+      "Nov",
+      "Oct",
+      "Sep"
+    ],
+    "OperatingSystems": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8"
+    ],
+    "Browser": [
+      "1",
+      "10",
+      "11",
+      "12",
+      "13",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "Region": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "TrafficType": [
+      "1",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "2",
+      "20",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "VisitorType": [
+      "New_Visitor",
+      "Other",
+      "Returning_Visitor"
+    ]
+  },
+  "unexpected_categories": {
+    "Month": [],
+    "OperatingSystems": [],
+    "Browser": [],
+    "Region": [],
+    "TrafficType": [],
+    "VisitorType": []
+  },
+  "numeric_summary": {
+    "Administrative": {
+      "count": 12330.0,
+      "mean": 2.3151662611516626,
+      "std": 3.3217841061569113,
+      "min": 0.0,
+      "50%": 1.0,
+      "95%": 9.0,
+      "99%": 14.0,
+      "max": 27.0
+    },
+    "Administrative_Duration": {
+      "count": 12330.0,
+      "mean": 80.81861053933592,
+      "std": 176.77910747048634,
+      "min": 0.0,
+      "50%": 7.5,
+      "95%": 348.26636905999936,
+      "99%": 830.5870409259969,
+      "max": 3398.75
+    },
+    "Informational": {
+      "count": 12330.0,
+      "mean": 0.5035685320356853,
+      "std": 1.270156425983391,
+      "min": 0.0,
+      "50%": 0.0,
+      "95%": 3.0,
+      "99%": 6.0,
+      "max": 24.0
+    },
+    "Informational_Duration": {
+      "count": 12330.0,
+      "mean": 34.47239792772304,
+      "std": 140.74929442219795,
+      "min": 0.0,
+      "50%": 0.0,
+      "95%": 195.0,
+      "99%": 716.3899999999921,
+      "max": 2549.375
+    },
+    "ProductRelated": {
+      "count": 12330.0,
+      "mean": 31.731467964314678,
+      "std": 44.47550330493652,
+      "min": 0.0,
+      "50%": 18.0,
+      "95%": 109.0,
+      "99%": 221.0,
+      "max": 705.0
+    },
+    "ProductRelated_Duration": {
+      "count": 12330.0,
+      "mean": 1194.7462199688268,
+      "std": 1913.6692878720035,
+      "min": 0.0,
+      "50%": 598.9369047499999,
+      "95%": 4300.289077449993,
+      "99%": 8701.142696919998,
+      "max": 63973.52223
+    },
+    "BounceRates": {
+      "count": 12330.0,
+      "mean": 0.02219138047072182,
+      "std": 0.048488321806260656,
+      "min": 0.0,
+      "50%": 0.0031124675,
+      "95%": 0.2,
+      "99%": 0.2,
+      "max": 0.2
+    },
+    "ExitRates": {
+      "count": 12330.0,
+      "mean": 0.04307279776650446,
+      "std": 0.048596540551443565,
+      "min": 0.0,
+      "50%": 0.0251564025,
+      "95%": 0.2,
+      "99%": 0.2,
+      "max": 0.2
+    },
+    "PageValues": {
+      "count": 12330.0,
+      "mean": 5.889257862693593,
+      "std": 18.568436607806525,
+      "min": 0.0,
+      "50%": 0.0,
+      "95%": 38.16052827749995,
+      "99%": 85.49849043159924,
+      "max": 361.7637419
+    },
+    "SpecialDay": {
+      "count": 12330.0,
+      "mean": 0.061427412814274114,
+      "std": 0.19891727315262864,
+      "min": 0.0,
+      "50%": 0.0,
+      "95%": 0.6,
+      "99%": 1.0,
+      "max": 1.0
+    },
+    "Weekend": {
+      "count": 12330.0,
+      "mean": 0.23260340632603407,
+      "std": 0.42250862674661804,
+      "min": 0.0,
+      "50%": 0.0,
+      "95%": 1.0,
+      "99%": 1.0,
+      "max": 1.0
+    }
+  },
+  "complete_duplicate_rows": 125,
+  "identical_predictor_extra_rows": 125,
+  "duplicate_decision": "Preserve all source rows: repeated observed sessions are not automatically erroneous. Quantify cross-partition overlap and also report a group-aware sensitivity.",
+  "outlier_decision": "Retain extreme values. No automatic clipping or removal. Training summaries and intensity distributions show skew.",
+  "source_expectations_match": true,
+  "cross_partition_duplicate_audit": {
+    "pairs": [
+      {
+        "a": "train",
+        "b": "validation",
+        "shared_vectors": 29,
+        "a_rows": 48,
+        "b_rows": 32,
+        "a_purchases": 0,
+        "b_purchases": 0
+      },
+      {
+        "a": "train",
+        "b": "test",
+        "shared_vectors": 13,
+        "a_rows": 30,
+        "b_rows": 18,
+        "a_purchases": 0,
+        "b_purchases": 0
+      },
+      {
+        "a": "validation",
+        "b": "test",
+        "shared_vectors": 7,
+        "a_rows": 8,
+        "b_rows": 12,
+        "a_purchases": 0,
+        "b_purchases": 0
+      }
+    ],
+    "group_sensitivity_method": "20 stratified group folds: 14 train, 3 validation, 3 test; identical predictor hashes kept together. Approximate 70/15/15; secondary only. Frozen primary hyperparameters and threshold reused; no group-test tuning."
+  }
+}

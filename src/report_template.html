@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A reproducible study of purchase classification from online browsing sessions: honest evaluation, error analysis, and an interactive validation threshold lab.">
+  <meta name="theme-color" content="#193e35">
+  <title>ShopperSense — From browsing to buying</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="threshold.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to report</a>
+<header class="topbar">
+  <a class="brand" href="#overview" aria-label="ShopperSense overview"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Shopper<span>Sense</span><span class="brand-dot">.</span></a>
+  <span class="topbar-note">BROWSING BEHAVIOUR / PURCHASE INTENTION</span>
+  <a class="topbar-link" href="#reproduce">Code &amp; evidence <span aria-hidden="true">↗</span></a>
+</header>
+<div class="report-layout">
+<aside class="sidebar" aria-label="Report contents">
+  <div class="sidebar-inner">
+    <p class="eyebrow">THE RESEARCH REPORT</p>
+    <nav aria-label="Sections">
+      <a href="#overview" class="active"><span>00</span> Overview</a>
+      <a href="#data"><span>01</span> The dataset</a>
+      <a href="#preprocessing"><span>02</span> Preparation</a>
+      <a href="#methods"><span>03</span> The models</a>
+      <a href="#evaluation"><span>04</span> Fair evaluation</a>
+      <a href="#results"><span>05</span> What we found</a>
+      <a href="#mistakes"><span>06</span> A closer look</a>
+      <a href="#threshold"><span>07</span> Threshold lab <b class="nav-dot" aria-hidden="true"></b></a>
+      <a href="#conclusions"><span>08</span> Conclusions</a>
+      <a href="#reproduce"><span>09</span> Reproduce it</a>
+    </nav>
+    <div class="sidebar-foot"><span class="status-dot" aria-hidden="true"></span> Reproducible ML study<p>UCI Dataset 468<br>Seed 42 · Full-feature primary</p><a href="data/selection.json">Inspect the decision record ↗</a></div>
+  </div>
+</aside>
+<main id="main">
+<section id="overview" class="hero section">
+  <div class="hero-meta"><span class="pill"><span class="status-dot" aria-hidden="true"></span> AN UNDERGRADUATE ML INVESTIGATION</span><span class="edition">RESEARCH NOTE / 2026</span></div>
+  <div class="hero-grid">
+    <div><p class="eyebrow">FROM SESSION SIGNALS TO PURCHASE INTENTION</p><h1>What turns<br><em>browsing</em><br>into buying?</h1><p class="hero-deck">Can recorded browsing behaviour identify sessions that end in a purchase?</p><p class="hero-scope">One historical dataset. Three standard classifiers. A majority baseline. A careful look at what the evidence can—and cannot—tell us.</p><a class="button" href="#results">Read the findings <span aria-hidden="true">↓</span></a><a class="text-link" href="#threshold">Try the threshold lab ↗</a></div>
+    <div class="hero-insight"><div class="insight-top"><span>THE HELD-OUT RESULT</span><span class="small-spark" aria-hidden="true">✳</span></div><p class="hero-metric">{{test_ap}}<span>average precision</span></p><div class="score-scale" aria-hidden="true"><span></span></div><p class="insight-model">{{selected_model}}<br><span>Full features · final test partition</span></p><div class="insight-divider"></div><p class="insight-bottom"><span class="tag">THE CATCH</span>Session summaries are informative. Their availability early enough to act is a separate question.</p><span class="insight-index" aria-hidden="true">01 / 04</span></div>
+  </div>
+  <div class="stat-strip"><div><strong>{{session_count}}</strong><span>recorded sessions</span></div><div><strong>17</strong><span>input features</span></div><div><strong>{{purchase_rate}}</strong><span>purchase prevalence</span></div><div><strong>70 / 15 / 15</strong><span>train / validation / test</span></div></div>
+  <div class="answer-callout"><span class="callout-label">THE BRIEF ANSWER</span><p>{{brief_answer}}</p></div>
+  <p class="provenance">GENERATED RUN <code>{{run_id}}</code><span>DATA SHA-256 <code>{{hash_prefix}}…</code></span><a href="data/summary.json">Machine-readable evidence ↗</a></p>
+  <div class="scope-note"><strong>What one row means.</strong> A recorded browsing session; Revenue = 1 means purchase, 0 means no purchase. Inputs are session summaries, so these results do not establish early-session prediction. Associations within this dataset do not prove causes or conversion uplift.</div>
+</section>
+
+<section id="data" class="section">
+  <div class="section-label"><span>01</span> THE DATASET</div><h2>A session is a story.<br>This dataset is its summary.</h2><p class="section-intro">The UCI Online Shoppers Purchasing Intention Dataset records browsing activity and whether the session ended in a purchase. We inspect the supplied file before using the source description as evidence.</p>
+  <div class="data-card"><div><span class="eyebrow">VERIFIED LOCAL FILE</span><h3>Online Shoppers<br>Purchasing Intention</h3><p>{{session_count}} sessions · {{purchase_count}} purchases<br>17 predictors + Revenue target</p></div><div><dl><dt>Source</dt><dd>UCI Machine Learning Repository · dataset 468</dd><dt>Creators / attribution</dt><dd>C. Sakar &amp; Yomi Kastro (2018)</dd><dt>License</dt><dd><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></dd><dt>Dataset DOI</dt><dd><a href="https://doi.org/10.24432/C5F88Q">10.24432/C5F88Q ↗</a></dd></dl><a class="text-link" href="https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset">Read the original source ↗</a></div></div>
+  <h3>The feature inventory</h3>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="All 17 predictors and their meanings"><table><caption>Predictors · Revenue is excluded from every model input</caption><thead><tr><th scope="col">Features</th><th scope="col">What they record</th><th scope="col">Treatment</th></tr></thead><tbody>
+    <tr><th scope="row">Administrative, Informational, ProductRelated</th><td>Page counts for three browsing categories</td><td>Numeric</td></tr>
+    <tr><th scope="row">Administrative_Duration, Informational_Duration, ProductRelated_Duration</th><td>Total time spent in each page category</td><td>Numeric</td></tr>
+    <tr><th scope="row">BounceRates</th><td>Analytics measure of visits leaving without another request</td><td>Numeric</td></tr>
+    <tr><th scope="row">ExitRates</th><td>Analytics measure of page views that end a session</td><td>Numeric</td></tr>
+    <tr><th scope="row">PageValues</th><td>Average page value associated with visits before a transaction; timing needs scrutiny</td><td>Numeric; removal experiment</td></tr>
+    <tr><th scope="row">SpecialDay</th><td>Proximity to a special day, on a 0–1 scale</td><td>Numeric</td></tr>
+    <tr><th scope="row">Month</th><td>Month category; the file contains ten observed months</td><td>One-hot category</td></tr>
+    <tr><th scope="row">OperatingSystems, Browser, Region, TrafficType</th><td>Category codes, without meaningful ordered distances</td><td>One-hot categories</td></tr>
+    <tr><th scope="row">VisitorType</th><td>Returning_Visitor, New_Visitor, or Other</td><td>One-hot category</td></tr>
+    <tr><th scope="row">Weekend</th><td>Whether the visit occurred on a weekend</td><td>Explicit 0/1</td></tr>
+  </tbody></table></div>
+  <h3>Quality is a result, too.</h3><p>{{quality_summary}}</p>{{quality_details}}<p>Large counts and durations are unusual but plausible. We preserve source rows and large values, report the duplicates, and inspect training distributions. Numeric category codes are never treated as ordered measurements. <a href="data/quality.json">Full quality report ↗</a></p>
+  {{class_figure}}
+  <h3>Explore using training data</h3><p>Structural counts above describe the entire file. The following exploratory comparisons use only the training partition; they do not use validation or test outcomes to choose preprocessing.</p>
+  {{visitor_figure}}{{visitor_table}}{{intensity_figure}}{{intensity_table}}
+</section>
+
+<section id="preprocessing" class="section">
+  <div class="section-label"><span>02</span> PREPARATION</div><h2>Prepare the inputs.<br>Protect the holdout.</h2><p class="section-intro">Every learned transformation sits inside a scikit-learn Pipeline and ColumnTransformer. Each CV fold fits its own preprocessing using only that fold’s training rows.</p>
+  <div class="table-wrap" tabindex="0" role="region" aria-label="Preprocessing choices and rationale"><table><caption>One consistent preprocessing contract</caption><thead><tr><th scope="col">Choice</th><th scope="col">Implementation</th><th scope="col">Why</th></tr></thead><tbody>
+    <tr><th scope="row">Numeric missingness</th><td>Training median, if needed</td><td>Retain rows without learning from the holdout; no missing values observed here</td></tr>
+    <tr><th scope="row">Categorical missingness</th><td>Fixed __missing__ category</td><td>Make missingness explicit; no missing values observed here</td></tr>
+    <tr><th scope="row">Category encoding</th><td>OneHotEncoder; ignore unknown categories</td><td>Codes are labels, not distances; vocabulary is fitted on training folds</td></tr>
+    <tr><th scope="row">Logistic Regression scale</th><td>StandardScaler on numeric features</td><td>Different units otherwise distort regularization and optimization</td></tr>
+    <tr><th scope="row">Tree numeric scale</th><td>Original values</td><td>Threshold-based trees do not require standardization</td></tr>
+    <tr><th scope="row">Target and row identity</th><td>Explicit Revenue 0/1; source_row_id from original row order</td><td>Neither the target nor the identifier enters the predictors</td></tr>
+    <tr><th scope="row">Imbalance and extremes</th><td>Stratification; no resampling, class weights, or outlier removal</td><td>Keep the core comparison simple; inspect precision/recall and threshold choices</td></tr>
+  </tbody></table></div>
+  <aside class="note"><span class="note-icon" aria-hidden="true">!</span><div><h4>A useful feature is not automatically an available feature.</h4><p>UCI describes PageValues as an analytics measure associated with pages visited before transactions. That definition warrants a timing audit; it does not prove this file leaks the target. We prespecify a with/without experiment. Counts, durations, bounce and exit summaries may also develop during or after a session.</p></div></aside>
+</section>
+
+<section id="methods" class="section">
+  <div class="section-label"><span>03</span> THE MODELS</div><h2>Start simple.<br>Earn the complexity.</h2><p class="section-intro">A reference and three familiar classifiers are enough to test the question. Each gets the same source rows, feature contract and evaluation protocol.</p>
+  <div class="model-grid">
+    <article class="model-card baseline"><span class="model-no">00 / REFERENCE</span><h3>Majority baseline</h3><p>Always predicts no purchase. Establishes how far accuracy can go without detecting a single buyer.</p><div class="model-detail"><strong>DummyClassifier</strong><span>strategy = most_frequent<br>No search</span></div><p class="weakness">Weakness: ignores every browsing signal.</p></article>
+    <article class="model-card"><span class="model-no">01 / LINEAR</span><h3>Logistic Regression</h3><p>Fits a regularized linear relationship in log odds after scaling and category encoding.</p><div class="model-detail"><strong>3 candidates</strong><span>C ∈ {0.1, 1, 10}<br>max_iter = 2000</span></div><p class="weakness">Weakness: limited nonlinear interactions without engineered terms.</p></article>
+    <article class="model-card"><span class="model-no">02 / RULES</span><h3>Decision Tree</h3><p>Recursively splits sessions into groups using feature thresholds; gives a readable rule structure.</p><div class="model-detail"><strong>6 candidates</strong><span>depth ∈ {3, 5, 8}<br>min leaf ∈ {5, 20}</span></div><p class="weakness">Weakness: a deeper tree may overfit and vary with the sample.</p></article>
+    <article class="model-card"><span class="model-no">03 / BAGGING</span><h3>Random Forest</h3><p>Averages 150 randomized trees to reduce variance. A standard nonlinear comparator.</p><div class="model-detail"><strong>4 candidates</strong><span>depth ∈ {8, unbounded}<br>min leaf ∈ {2, 10}</span></div><p class="weakness">Weakness: harder to interpret as a whole than one tree or a linear model.</p></article>
+  </div><p class="muted">No advanced boosting, class weighting, resampling, or large parameter search. random_state = 42 wherever supported. Actual parameters and fitted category vocabularies are saved in the source bundle.</p>
+</section>
+
+<section id="evaluation" class="section">
+  <div class="section-label"><span>04</span> FAIR EVALUATION</div><h2>Three partitions.<br>Three different jobs.</h2><p class="section-intro">We hold out 15% for test, then take 15/85 of the remaining rows for validation. Both splits are stratified with seed 42. Exact source row IDs are saved and checked for complete, disjoint coverage.</p>
+  <div class="split-visual" role="img" aria-label="70 percent training, 15 percent validation, 15 percent test"><span class="split-train">70%<small>TRAIN</small></span><span class="split-validation">15%<small>VALIDATE</small></span><span class="split-test">15%<small>TEST</small></span></div>
+  {{split_table}}
+  <ol class="protocol"><li><strong>Tune on training only.</strong> Three-fold StratifiedKFold, shuffled, seed 42. GridSearchCV maximizes purchase average precision and refits on the full training partition. Every candidate and fold score is saved.</li><li><strong>Select on validation.</strong> Evaluate tuned models at 0.50, choose by AP with the declared simplicity tolerance, then choose the selected model’s F1 threshold on the fixed 0.05–0.95 grid.</li><li><strong>Freeze, then test.</strong> Persist the model, parameters, feature sets and threshold before test predictions. Compare all frozen variants at 0.50, plus the selected model at its chosen threshold.</li></ol>
+  <h3>What the metrics mean</h3><div class="metric-definitions"><p><strong>Average precision (AP)</strong>Purchase precision summarized over recall increments across thresholds. Primary ranking metric; not trapezoidal PR-AUC.</p><p><strong>Precision</strong>Of the sessions predicted to purchase, how many actually did: TP / (TP + FP).</p><p><strong>Recall</strong>Of the actual purchases, how many were detected: TP / (TP + FN).</p><p><strong>F1</strong>Harmonic mean of precision and recall. Used for the illustrative threshold choice.</p><p><strong>ROC-AUC</strong>Ranking discrimination between a random buyer and non-buyer across thresholds.</p><p><strong>Accuracy</strong>Correct predictions / all sessions. Can reward the dominant non-purchase class.</p></div><p class="muted">Precision and recall use zero_division=0. A zero displayed when no positive predictions exist is an implementation convention; precision is mathematically undefined there. Single-class ROC-AUC would be undefined and disclosed. Model scores are not claimed to be calibrated probabilities. There is no known business cost ratio.</p>
+  <div class="decision-box"><span class="eyebrow">THE FROZEN DECISION</span><h3>{{selected_model}} <span>at {{chosen_threshold}}</span></h3><p>{{selection_text}}</p><a href="data/selection.json">Inspect timestamp, parameters &amp; evidence ↗</a></div>
+</section>
+
+<section id="results" class="section">
+  <div class="section-label"><span>05</span> WHAT WE FOUND</div><h2>Better than the baseline.<br>Still far from every buyer.</h2><p class="section-intro">Validation makes the choices. Test provides the final comparison. The tables include every primary classifier and both prespecified feature-removal variants, with purchase-class metrics and support.</p>
+  <h3>First: the validation evidence</h3>{{validation_table}}
+  <h3>Then: the untouched primary test</h3><p>{{test_ranking_text}}</p>{{test_table}}<p class="muted">AP and ROC-AUC do not change when only the classification threshold changes. Dummy predicts no buyers at 0.50: precision is undefined and displayed as 0 by the zero_division convention; recall and F1 are 0.</p>
+  {{pr_figure}}{{confusion_figure}}{{confusion_table}}
+  <h3>Does a deeper tree generalize?</h3>{{depth_figure}}{{depth_table}}
+</section>
+
+<section id="mistakes" class="section">
+  <div class="section-label"><span>06</span> A CLOSER LOOK</div><h2>The mistakes deserve<br>their own explanation.</h2><p class="section-intro">{{error_text}}</p>
+  {{error_examples}}<p class="muted">These are the first four source rows in each error category, sorted by original zero-based source_row_id. Scores are rounded only for display. Features are observed session summaries; we cannot infer why a visitor did or did not buy.</p>
+  <h3>Do errors look the same across groups?</h3><p>{{bin_text}}</p>{{subgroup_table}}<p>Compare missed purchases using FN / buyers and false alarms using FP / non-buyers. Small denominators make these rates unstable. These exploratory subgroup counts do not establish discrimination, motives, or causal effects; no uncertainty intervals or significance claims are made.</p>
+  <h3>How much does PageValues matter?</h3><p>{{pagevalues_text}}</p>{{pagevalues_figure}}<p>The full-feature condition remains the prespecified primary study. Logistic Regression and Random Forest were retrained without PageValues using identical primary rows and their original bounded training-CV grids. Validation dependence was inspected before freezing; final test variants were evaluated without changing the primary model.</p>
+  <h3>What about those repeated sessions?</h3>{{overlap_table}}<p>Identical predictors can straddle the primary split even though source row IDs are disjoint. This can make evaluation easier. We preserve the original split and add a separate group-aware sensitivity rather than silently deduplicating the data.</p><p>{{group_text}}</p>{{group_table}}
+</section>
+
+<section id="threshold" class="section threshold-section">
+  <div class="section-label"><span>07</span> THE THRESHOLD LAB</div><div class="lab-heading"><div><h2>A different cutoff.<br>A different kind of mistake.</h2><p class="section-intro">Explore the selected model’s actual validation scores. A session is predicted to purchase when its score is greater than or equal to your threshold.</p></div><span class="lab-badge">INTERACTIVE<br>VALIDATION ONLY</span></div>
+  <div class="lab" id="threshold-lab" aria-busy="true">
+    <div class="lab-top"><div><span class="eyebrow">VALIDATION EXPLORATION</span><h3>{{selected_model}} <span>· full features</span></h3><p id="lab-support">Loading the actual validation scores…</p></div><button class="button secondary" type="button" id="reset-threshold" disabled>Reset to 0.50 <span aria-hidden="true">↺</span></button></div>
+    <div id="lab-error" class="lab-error" role="alert" hidden></div>
+    <div class="slider-heading"><label for="threshold-slider">Classification threshold</label><output for="threshold-slider" id="threshold-value">0.50</output></div>
+    <div class="slider-wrap"><input type="range" min="0" max="1" value="0.50" step="0.01" id="threshold-slider" disabled aria-describedby="slider-help chosen-marker"><span id="chosen-marker" class="chosen-marker">Selected {{chosen_threshold}}</span></div>
+    <div class="slider-axis" aria-hidden="true"><span>0.00 · MORE PREDICTED BUYERS</span><span>1.00 · FEWER PREDICTED BUYERS</span></div>
+    <p id="slider-help" class="muted">Use arrow keys for 0.01 steps. The marker is the frozen validation F1 choice. Scores are not calibrated purchase probabilities.</p>
+    <div class="lab-metrics" aria-live="polite" aria-atomic="true"><div><span>Predicted buyers</span><strong id="lab-predicted">—</strong></div><div><span>Precision</span><strong id="lab-precision">—</strong></div><div><span>Recall</span><strong id="lab-recall">—</strong></div><div><span>F1</span><strong id="lab-f1">—</strong></div></div>
+    <div class="lab-bottom"><div class="lab-confusion"><div><span>TRUE POSITIVES</span><strong id="lab-tp">—</strong><small>Detected actual buyers</small></div><div><span>FALSE POSITIVES</span><strong id="lab-fp">—</strong><small>False purchase alarms</small></div><div><span>FALSE NEGATIVES</span><strong id="lab-fn">—</strong><small>Missed actual buyers</small></div><div><span>TRUE NEGATIVES</span><strong id="lab-tn">—</strong><small>Correct non-buyers</small></div></div><div class="lab-reading"><span class="eyebrow">READ THE TRADEOFF</span><p id="lab-interpretation">The observed counts will appear when validation data loads.</p><p>Lowering the threshold usually detects more buyers and creates more false alarms. Moving it does not retrain the model or change the official test results.</p><a href="data/threshold_validation.json">Inspect the underlying scores ↗</a></div></div>
+  </div><noscript><p class="lab-error">JavaScript is required for the threshold lab. The full report and official results remain readable. Download the validation scores and compute score ≥ threshold to reproduce the counts.</p></noscript>
+</section>
+
+<section id="conclusions" class="section">
+  <div class="section-label"><span>08</span> CONCLUSIONS &amp; LIMITATIONS</div><h2>Signals, with boundaries.</h2><p class="conclusion-lead">{{conclusion}}</p>
+  <div class="limitations"><article><span>01</span><div><h3>Timing is unresolved</h3><p>These are recorded session summaries. Some signals may be known only after browsing progresses or ends. Neither the full-feature nor reduced-feature experiment proves an early-session decision is possible.</p></div></article><article><span>02</span><div><h3>One historical setting</h3><p>A random stratified split measures internal discrimination, not future-time or cross-site generalization. No external validation, conversion intervention, uplift test, or business impact study was performed.</p></div></article><article><span>03</span><div><h3>Uncertainty remains</h3><p>Results come from one deterministic primary split and small grids. Differences are descriptive, without confidence intervals or significance tests. Duplicate and subgroup sensitivities help inspection but do not remove uncertainty.</p></div></article><article><span>04</span><div><h3>The labels set the scope</h3><p>Revenue records purchase occurrence. The file contains no customer price/quality preferences, purchase motives or product-quality labels. Scores are uncalibrated; the F1 threshold is illustrative, without known business costs.</p></div></article></div>
+  <p class="next-step"><strong>A sensible next investigation:</strong> collect timestamped feature snapshots, declare a real decision point and cost model, then evaluate prospectively on a later period. That would answer a different, operational question.</p>
+</section>
+
+<section id="reproduce" class="section">
+  <div class="section-label"><span>09</span> REPRODUCE &amp; CREDITS</div><h2>Follow every number<br>back to a row.</h2><p class="section-intro">The source bundle includes the real dataset, deterministic split IDs, complete CV candidates, unrounded row-level predictions, metrics, figures, code, notebooks, tests and deployment workflow.</p>
+  {{repo_access}}<div class="download-actions"><a class="button" href="assets/reproducibility.zip" download>Download source &amp; evidence <span aria-hidden="true">↓</span></a><a class="text-link" href="data/test_metrics.csv" download>Test results CSV ↗</a></div>
+  <div class="code-block"><span>FROM THE REPOSITORY ROOT · PYTHON 3.12</span><pre><code>python -m venv .venv
+# Activate: .venv\Scripts\Activate.ps1 (PowerShell)
+# or: source .venv/bin/activate (macOS / Linux)
+python -m pip install -r requirements.txt
+python -m src.run_all --data data/raw/online_shoppers_intention.csv
+python -m pytest -q
+python -m http.server 8000 --directory docs</code></pre></div>
+  <p>The measured model-training and evaluation stage took {{runtime}} seconds on the implementation machine; runtime depends on hardware. Notebooks read and analyze the generated artifacts through shared source functions; the pipeline command performs the training. Run instructions and the exact dependency lock are included in the README.</p>
+  <p><strong>Data integrity:</strong> <code class="hash">{{data_hash}}</code></p><p>Dataset source metadata and CC BY 4.0 attribution were checked on 16 November 2026. The file was supplied locally; its original retrieval date is unknown. The checksum identifies the supplied bytes; it is not a claim of byte-for-byte comparison against a newly downloaded UCI archive.</p>
+  <h3>Credits &amp; AI-use disclosure</h3><p>The requester supplied the PRD and local CSV. Codex implemented the Python pipeline, website, notebooks, documentation and automated checks, and executed the verification recorded in the repository. No human review or contributor identities are asserted. Authors should add their actual names and accurately describe their own review before submission.</p>
+  <h3>References actually consulted</h3><ul class="references"><li><a href="https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset">Sakar &amp; Kastro (2018). UCI Online Shoppers Purchasing Intention Dataset.</a> Data definitions, attribution, counts and license.</li><li><a href="https://scikit-learn.org/stable/modules/model_evaluation.html">Scikit-learn: Metrics and scoring.</a> Purchase-class evaluation and AP terminology.</li><li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages">GitHub Pages documentation.</a> Static-site deployment; the bundled workflow publishes docs/.</li></ul>
+  <div class="final-note"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><p>ShopperSense<span>A modest model comparison. An inspectable chain of evidence.</span></p><a href="#overview">Back to the question ↑</a></div>
+</section>
+<footer>Research, not a commercial predictor.<span>{{run_id}} · source hash {{hash_prefix}}</span></footer>
+</main></div>
+</body>
+</html>

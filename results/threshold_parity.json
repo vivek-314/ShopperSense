@@ -1,0 +1,154 @@
+[
+  {
+    "name": "validation threshold 0.0",
+    "threshold": 0.0,
+    "metrics": {
+      "threshold": 0.0,
+      "support": 1850,
+      "purchases": 286,
+      "predicted_purchases": 1850,
+      "precision": 0.1545945945945946,
+      "recall": 1.0,
+      "f1": 0.26779026217228463,
+      "ap": 0.7254373691936357,
+      "roc_auc": 0.9198039811850554,
+      "accuracy": 0.1545945945945946,
+      "tn": 0,
+      "fp": 1564,
+      "fn": 0,
+      "tp": 286,
+      "precision_defined": true,
+      "recall_defined": true
+    }
+  },
+  {
+    "name": "validation threshold 0.5",
+    "threshold": 0.5,
+    "metrics": {
+      "threshold": 0.5,
+      "support": 1850,
+      "purchases": 286,
+      "predicted_purchases": 170,
+      "precision": 0.7941176470588235,
+      "recall": 0.47202797202797203,
+      "f1": 0.5921052631578947,
+      "ap": 0.7254373691936357,
+      "roc_auc": 0.9198039811850554,
+      "accuracy": 0.8994594594594595,
+      "tn": 1529,
+      "fp": 35,
+      "fn": 151,
+      "tp": 135,
+      "precision_defined": true,
+      "recall_defined": true
+    }
+  },
+  {
+    "name": "validation threshold 1.0",
+    "threshold": 1.0,
+    "metrics": {
+      "threshold": 1.0,
+      "support": 1850,
+      "purchases": 286,
+      "predicted_purchases": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "ap": 0.7254373691936357,
+      "roc_auc": 0.9198039811850554,
+      "accuracy": 0.8454054054054054,
+      "tn": 1564,
+      "fp": 0,
+      "fn": 286,
+      "tp": 0,
+      "precision_defined": false,
+      "recall_defined": true
+    }
+  },
+  {
+    "name": "validation threshold 0.24",
+    "threshold": 0.24,
+    "metrics": {
+      "threshold": 0.24,
+      "support": 1850,
+      "purchases": 286,
+      "predicted_purchases": 371,
+      "precision": 0.5876010781671159,
+      "recall": 0.7622377622377622,
+      "f1": 0.6636225266362252,
+      "ap": 0.7254373691936357,
+      "roc_auc": 0.9198039811850554,
+      "accuracy": 0.8805405405405405,
+      "tn": 1411,
+      "fp": 153,
+      "fn": 68,
+      "tp": 218,
+      "precision_defined": true,
+      "recall_defined": true
+    }
+  },
+  {
+    "name": "equality",
+    "y_true": [
+      1,
+      0,
+      1,
+      0
+    ],
+    "purchase_score": [
+      0.5,
+      0.8,
+      0.2,
+      0.1
+    ],
+    "threshold": 0.5,
+    "metrics": {
+      "threshold": 0.5,
+      "support": 4,
+      "purchases": 2,
+      "predicted_purchases": 2,
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1": 0.5,
+      "ap": 0.5833333333333333,
+      "roc_auc": 0.5,
+      "accuracy": 0.5,
+      "tn": 1,
+      "fp": 1,
+      "fn": 1,
+      "tp": 1,
+      "precision_defined": true,
+      "recall_defined": true
+    }
+  },
+  {
+    "name": "no positives",
+    "y_true": [
+      0,
+      1
+    ],
+    "purchase_score": [
+      0.1,
+      0.2
+    ],
+    "threshold": 1.0,
+    "metrics": {
+      "threshold": 1.0,
+      "support": 2,
+      "purchases": 1,
+      "predicted_purchases": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "ap": 1.0,
+      "roc_auc": 1.0,
+      "accuracy": 0.5,
+      "tn": 1,
+      "fp": 0,
+      "fn": 1,
+      "tp": 0,
+      "precision_defined": false,
+      "recall_defined": true
+    }
+  }
+]

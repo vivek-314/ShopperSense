@@ -1,0 +1,72 @@
+{
+  "source_filename": "online_shoppers_intention.csv",
+  "sha256": "b3055ee355f59134d851d32641183cb4a8b45def7124d2f50442a042f358e0d9",
+  "source": "https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset",
+  "doi": "10.24432/C5F88Q",
+  "attribution": "Sakar, C. & Kastro, Y. (2018). Online Shoppers Purchasing Intention Dataset. UCI Machine Learning Repository.",
+  "license": "CC BY 4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "provenance": "Supplied locally; original download date unknown. Raw bytes preserved.",
+  "source_metadata_verified_on": "2026-11-16",
+  "inspection_utc": "2026-11-16T14:34:03.771373+00:00",
+  "rows": 12330,
+  "predictors": 17,
+  "columns": [
+    "Administrative",
+    "Administrative_Duration",
+    "Informational",
+    "Informational_Duration",
+    "ProductRelated",
+    "ProductRelated_Duration",
+    "BounceRates",
+    "ExitRates",
+    "PageValues",
+    "SpecialDay",
+    "Month",
+    "OperatingSystems",
+    "Browser",
+    "Region",
+    "TrafficType",
+    "VisitorType",
+    "Weekend",
+    "Revenue"
+  ],
+  "dtypes": {
+    "Administrative": "int64",
+    "Administrative_Duration": "float64",
+    "Informational": "int64",
+    "Informational_Duration": "float64",
+    "ProductRelated": "int64",
+    "ProductRelated_Duration": "float64",
+    "BounceRates": "float64",
+    "ExitRates": "float64",
+    "PageValues": "float64",
+    "SpecialDay": "float64",
+    "Month": "str",
+    "OperatingSystems": "int64",
+    "Browser": "int64",
+    "Region": "int64",
+    "TrafficType": "int64",
+    "VisitorType": "str",
+    "Weekend": "bool",
+    "Revenue": "bool"
+  },
+  "target_mapping": {
+    "FALSE": 0,
+    "TRUE": 1
+  },
+  "class_counts": {
+    "0": 10422,
+    "1": 1908
+  },
+  "environment": {
+    "python": "3.12.14",
+    "numpy": "2.5.5",
+    "pandas": "3.1.1",
+    "scikit-learn": "1.9.1",
+    "matplotlib": "3.11.2",
+    "jupyter": "1.1.1",
+    "pytest": "9.2.0",
+    "joblib": "1.6.0"
+  }
+}

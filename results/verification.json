@@ -1,0 +1,53 @@
+{
+  "local_asset_references_checked": 18,
+  "unique_html_ids": 28,
+  "zip_integrity": "passed",
+  "rerun_byte_identical_results": {
+    "validation_metrics": "65fd86fda10a14a4dc75a891d3389232d997b0ec3a93176714fe85a6afc0cc0c",
+    "test_metrics": "79df9369fbbbd244a5f8aaca5e2c04d75f83022d4bcca096a4bd7e976bbaee39",
+    "validation_predictions": "d34a478331f6f91e4b9ce9800a7a943b49fb93d8e81f548fe827c1b8a42798d2",
+    "test_predictions": "5f73cafa292975ec27cad143d42d1af35a8d66e864e7bbfddb44a618db88d085"
+  },
+  "verified_utc": "2026-11-16T14:39:14.928880+00:00",
+  "pytest": {
+    "passed": 11,
+    "failed": 0,
+    "warnings": "Five nonfatal pandas CSV parser deprecations; no estimator convergence warnings"
+  },
+  "js_python_parity": {
+    "fixtures": 6,
+    "status": "passed"
+  },
+  "notebooks": {
+    "01_data_and_reasoning": "executed top to bottom",
+    "02_models_and_results": "executed top to bottom",
+    "notes": "All code cells completed with zero error outputs. Windows selector fallback and local TCP notices were nonfatal; one final kernel teardown emitted a connection-reset notice after computation."
+  },
+  "browser": {
+    "desktop": "passed at default 1101px viewport",
+    "mobile": "passed at 390x844; document width375px <= viewport390px",
+    "thresholds_checked": [
+      0,
+      0.24,
+      0.5,
+      1
+    ],
+    "keyboard_and_reset": "passed; browser counts agree with Python fixtures",
+    "console_errors": 0,
+    "missing_data": "passed: isolated absent-JSON copy showed explanatory error, disabled controls, and no fabricated counts"
+  },
+  "deployment": "pending Pages setup",
+  "run_id": "ss-b3055ee3-c246965f",
+  "notebook_cell_audit": {
+    "01_data_and_reasoning.ipynb": {
+      "code_cells": 7,
+      "executed_cells": 7,
+      "errors": 0
+    },
+    "02_models_and_results.ipynb": {
+      "code_cells": 9,
+      "executed_cells": 9,
+      "errors": 0
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "run_id": "ss-b3055ee3-c246965f",
+  "data_sha256": "b3055ee355f59134d851d32641183cb4a8b45def7124d2f50442a042f358e0d9",
+  "source_code_sha256": "c246965fe7350298c94c4ebe0ea2a6ab9fe0609e4019995d27148c1148afed8e",
+  "training_and_evaluation_seconds": 232.94880460001878,
+  "test_policy": "No test-based model or threshold changes",
+  "environment": {
+    "python": "3.12.14",
+    "numpy": "2.5.5",
+    "pandas": "3.1.1",
+    "scikit-learn": "1.9.1",
+    "matplotlib": "3.11.2",
+    "jupyter": "1.1.1",
+    "pytest": "9.2.0",
+    "joblib": "1.6.0"
+  }
+}
