@@ -8,14 +8,14 @@
   const labels={product_pages:'Product pages viewed',product_seconds:'Time on product pages',information_pages:'Information pages viewed',information_seconds:'Time on information pages',visitor_type:'Visitor type',weekend:'Weekend visit'};
   const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   function showMessage(id,text) {$(id).textContent=text;$(id).hidden=!text;}
-  function switchMode(mode,focus=false) {
+  function switchMode(mode,focus=false,updateURL=true) {
     for(const tab of tabs) {
       const active=tab.dataset.mode===mode;
       tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;
       $(tab.getAttribute('aria-controls')).hidden=!active;
       if(active&&focus) tab.focus();
     }
-    history.replaceState(null,'',mode==='bulk'?'#csv':location.pathname+location.search);
+    if(updateURL) history.pushState(null,'',mode==='bulk'?'#csv':'#workspace');
   }
   tabs.forEach((tab,index)=>{
     tab.addEventListener('click',()=>switchMode(tab.dataset.mode));
@@ -27,9 +27,11 @@
       }
     });
   });
-  if(location.hash==='#csv') switchMode('bulk');
-  // Keep old shared threshold deep links useful after the product homepage replaces the report.
-  if(['#threshold','#results','#overview','#preprocessing','#methods','#evaluation','#mistakes','#conclusions','#reproduce','#data'].includes(location.hash)) location.replace('research.html'+location.hash);
+  if(location.hash==='#csv') switchMode('bulk',false,false);
+  window.addEventListener('hashchange',()=>{
+    if(location.hash==='#csv') switchMode('bulk',false,false);
+    else if(location.hash==='#workspace'||!location.hash) switchMode('single',false,false);
+  });
   function values() {return Object.fromEntries(new FormData(form));}
   function clearErrors() {
     showMessage('form-error','');
@@ -67,7 +69,8 @@
     const test=artifact.test_metrics;
     $('result-caveat').textContent=`On the historical test split, ${test.tp} of ${test.predicted_purchases} flagged sessions actually purchased; ${test.fp} were false alarms. Your store may differ. This score is not a calibrated probability.`;
     $('prediction-time').textContent=`Scored ${new Date().toLocaleString()} · ${artifact.run_id}`;
-    $('prediction-result').setAttribute('aria-live','polite');
+    $('prediction-announcement').textContent=`${$('prediction-label').textContent}. Purchase signal score ${points.toFixed(1)} out of 100. This is not a confirmed sale.`;
+    $('prediction-result').focus({preventScroll:true});
     $('result-card').scrollIntoView({behavior:'auto',block:'start'});
   }
   function submitSession(event) {
@@ -75,17 +78,24 @@
     clearErrors();const input=values();
     try {renderSingle(engine.predict(input,artifact),input.session_id.trim());}
     catch(error) {
-      showMessage('form-error','Please correct the highlighted fields. No prediction was made for these inputs.');
+      const summary=$('form-error');summary.replaceChildren();summary.hidden=false;
+      const heading=document.createElement('strong');heading.textContent='Check these inputs before predicting.';summary.appendChild(heading);
+      const list=document.createElement('ul');
       for(const item of error.fields||[]) {
-        const id=fieldIds[item.field];if(id) {$(id).setAttribute('aria-invalid','true');$(id+'-error').textContent=item.message;}
+        const id=fieldIds[item.field];if(id) {
+          $(id).setAttribute('aria-invalid','true');$(id+'-error').textContent=item.message;
+          const li=document.createElement('li'),link=document.createElement('a');link.href='#'+id;link.textContent=item.message;
+          link.addEventListener('click',event=>{event.preventDefault();$(id).focus();});li.appendChild(link);list.appendChild(li);
+        }
       }
-      const first=error.fields?.[0]&&fieldIds[error.fields[0].field];if(first) $(first).focus();
+      if(!list.children.length) {const li=document.createElement('li');li.textContent=error.message;list.appendChild(li);}
+      summary.appendChild(list);summary.focus();
       if(singleResult) markStale();
     }
   }
   form.addEventListener('submit',submitSession);
   $('clear-session').addEventListener('click',()=>{
-    form.reset();clearErrors();singleResult=null;historicalSingle=false;$('example-label').hidden=true;$('empty-result').hidden=false;$('prediction-result').hidden=true;$('stale-note').hidden=true;$('result-card').classList.remove('stale');$('result-status').textContent='WAITING FOR INPUT';$('product-pages').focus();
+    form.reset();clearErrors();singleResult=null;historicalSingle=false;$('example-label').hidden=true;$('empty-result').hidden=false;$('prediction-result').hidden=true;$('stale-note').hidden=true;$('result-card').classList.remove('stale');$('result-status').textContent='WAITING FOR INPUT';$('prediction-announcement').textContent='Inputs cleared.';$('product-pages').focus();
   });
   function download(name,csv) {
     const url=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
@@ -169,14 +179,17 @@
       if(data.schema_version!==2||data.feature_set!=='six_observable_inputs'||!data.inference||!data.test_metrics||!Array.isArray(data.input_contract)||data.input_contract.length!==5||!Number.isFinite(data.threshold)||data.threshold<0||data.threshold>1) throw new Error('Model format is invalid.');
       artifact=data;
       const t=data.test_metrics;
-      $('model-status').textContent='Ready to score your own sessions · Experimental model trained on historical browsing data · No automatic store connection';
-      ['predict-button','load-example','load-csv-example'].forEach(id=>$(id).disabled=false);
+      $('model-status').textContent='Model ready · Score your own data, privately in this browser';
+      ['predict-button','load-example','load-csv-example','csv-file'].forEach(id=>$(id).disabled=false);
       $('reliability-found').textContent=`${t.tp} / ${t.purchases}`;$('reliability-flagged').textContent=`${t.tp} / ${t.predicted_purchases}`;
       $('reliability-copy').textContent=`Of ${t.support.toLocaleString()} historical test sessions, the model found ${t.tp} of ${t.purchases} purchases and missed ${t.fn}. It also flagged ${t.fp} sessions that did not purchase. These false alarms make human review essential.`;
       $('model-details').textContent=`${data.model_name}, fitted on ${data.trained_on.toLocaleString()} training sessions with exactly six inputs. The fixed ${data.threshold.toFixed(2)} score cutoff was selected on validation F1 before this condition’s test evaluation. Its test AP is ${t.ap.toFixed(3)}. It is a separate model from the full-feature research benchmark. Version ${data.run_id}.`;
       $('footer-version').textContent=data.run_id;
     } catch(error) {
-      artifact=null;$('model-status').classList.add('error');$('model-status').textContent='The trained model could not be loaded. Reload the page or check your connection. Predictions are disabled; no substitute scores are generated.';console.error('Prediction model unavailable:',error.message);
+      artifact=null;$('model-status').classList.add('error');$('model-status').textContent='The trained model could not be loaded. Reload the page or check your connection. Predictions are disabled; no substitute scores are generated.';
+      $('reliability-copy').textContent='The model could not be loaded, so its reliability summary is unavailable here. The saved research evidence below remains readable.';
+      $('model-details').textContent='Reload to fetch the model and its decision rule. No substitute model is used.';
+      console.error('Prediction model unavailable:',error.message);
     }
   }
   loadModel();

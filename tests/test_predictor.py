@@ -67,6 +67,6 @@ def test_product_scores_stable_order_and_export_fixtures():
     assert sum(row['name'].startswith('new-input:') for row in fixtures)==3
     index=(ROOT/'docs/index.html').read_text(encoding='utf-8')
     assert 'session-form' in index and 'csv-file' in index
-    assert 'research.html' in index
+    assert 'href="#research"' in index
     assert 'name="account_pages"' not in index and 'name="account_seconds"' not in index
     assert '03_six_input_models_step_by_step.ipynb' in index
