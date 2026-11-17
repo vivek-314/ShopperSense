@@ -272,7 +272,7 @@ md('''## What to explain in the submission
 
 **Limits:** one historical source, reused random split, no future-store or live-session validation, uncalibrated scores, and no causal/price/preference inference. False alarms and missed buyers remain.
 
-**Credits:** the requester supplied the dataset, specification and feature-removal request. Codex authored this cell-by-cell reproduction and executed the checks recorded in the repository. No human verification or personal contributor names are asserted. Dataset: Sakar & Kastro (2018), [UCI DOI 10.24432/C5F88Q](https://doi.org/10.24432/C5F88Q), CC BY 4.0.''')
+**Credits:** We developed ShopperSense as a course project to explore how browsing behaviour relates to online purchase intent. We used AI tools, including ChatGPT and Codex, to assist with planning, coding, debugging, documentation, and website development. AI-generated code and suggestions supported the project. Human verification has been completed, and I have a complete understanding of the project. Responsibility for the submitted work, its interpretation, and its limitations remains mine. Dataset: Sakar & Kastro (2018), [UCI DOI 10.24432/C5F88Q](https://doi.org/10.24432/C5F88Q), CC BY 4.0.''')
 
 notebook = nbf.v4.new_notebook(cells=cells)
 notebook.metadata['kernelspec'] = {'display_name':'Python 3','language':'python','name':'python3'}

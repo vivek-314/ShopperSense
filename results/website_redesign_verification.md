@@ -42,6 +42,6 @@ Local preview used the in-app browser. Checked widths: 320, 390, 768, 1024 and 1
 - Missing model file: prediction and CSV file controls stay disabled, an actionable error appears, and the separately loaded research lab remains usable. No substitute scores are produced.
 - Successful-page console check reported no warnings or errors.
 
-This is bounded development QA, not a claim of full WCAG conformance. Actual screen-reader announcements, assistive-technology user testing, browser zoom/text-spacing changes and other browsers were not exercised. Reduced-motion support is implemented in CSS; its operating-system preference was not changed during testing. No human acceptance or individual contribution is asserted.
+This is bounded development QA, not a claim of full WCAG conformance. Actual screen-reader announcements, assistive-technology user testing, browser zoom/text-spacing changes and other browsers were not exercised. Reduced-motion support is implemented in CSS; its operating-system preference was not changed during testing. The project author has confirmed that human verification is complete. This report records the bounded automated and browser checks above; that confirmation does not add unperformed assistive-technology tests to this record.
 
 The branch is reviewable separately from `main`; its GitHub Pages workflow continues to publish `main` only.

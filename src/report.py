@@ -288,7 +288,7 @@ def make_bundle(output, docs):
                 if not path.is_file() or any(p in path.parts for p in ['__pycache__', 'models', 'browser-qa', '.ipynb_checkpoints']) or path.name == 'reproducibility.zip' or path.name.startswith('executed_'):
                     continue
                 bundle.write(path, path.relative_to(ROOT))
-        for name in ['README.md', 'PRD.md', 'DESIGN.md', 'requirements.txt', 'requirements-lock.txt', 'site_config.json', '.gitignore', '.gitattributes']:
+        for name in ['README.md', 'DESIGN.md', 'requirements.txt', 'requirements-lock.txt', 'site_config.json', '.gitignore', '.gitattributes']:
             path = ROOT/name
             if path.exists():
                 bundle.write(path, name)

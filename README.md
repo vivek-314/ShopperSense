@@ -282,7 +282,6 @@ Scoring happens locally in the browser. Session inputs and CSVs are not sent to 
 ```text
 ShopperSense-study/
 ├── README.md
-├── PRD.md                          # Original implementation specification
 ├── requirements.txt               # Pinned direct dependencies
 ├── requirements-lock.txt          # Full tested Windows environment
 ├── site_config.json               # Actual repository and website URLs
@@ -448,4 +447,6 @@ Analytics integrations, automated event ingestion and a retraining workflow coul
 
 Source metadata and technical references were consulted during implementation on 16 November 2026. The live prediction and research URLs were rechecked for this README update on 17 November 2026. Figures are generated from the supplied data and saved model outputs; no fabricated performance values or screenshots are used.
 
-The requester supplied the CSV, project specification and subsequent scope decisions. **OpenAI Codex authored and executed** the implementation, notebooks, website, documentation and automated checks. Automated verification is distinct from human review: no human verification, contributor identities or partner roles are asserted. Project authors should add their actual contributions and independently review methodology and publication links. The original scope is retained in [PRD.md](PRD.md), and the repository preserves earlier experimental evidence rather than rewriting it to match later interface changes.
+### Credits & AI-use disclosure
+
+We developed ShopperSense as a course project to explore how browsing behaviour relates to online purchase intent. We used AI tools, including ChatGPT and Codex, to assist with planning, coding, debugging, documentation, and website development. AI-generated code and suggestions supported the project. Human verification has been completed, and I have a complete understanding of the project. Responsibility for the submitted work, its interpretation, and its limitations remains mine.
