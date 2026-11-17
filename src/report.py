@@ -221,7 +221,7 @@ def generate_report(output, docs, frame, parts):
     (docs/'research.html').write_text('''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#040506"><title>ShopperSense — Research has moved</title>
-<link rel="stylesheet" href="workspace.css?v=7"><script src="legacy-redirect.js" defer></script></head>
+<script src="theme.js?v=1"></script><link rel="stylesheet" href="workspace.css?v=8"><script src="legacy-redirect.js" defer></script></head>
 <body class="redirect-page"><main><h1>The research is now on the main page.</h1><p>The predictor, results and evidence are together in one place.</p><a class="button primary" href="./#research">Open ShopperSense research</a></main></body></html>''', encoding='utf-8')
     (docs/'.nojekyll').touch()
     for name in ['data_manifest.json', 'quality.json', 'selection.json', 'test_metrics.csv', 'validation_metrics.csv', 'pagevalues_comparison.csv', 'error_analysis.json', 'cv_results.csv', 'splits.json', 'threshold_grid.csv']:

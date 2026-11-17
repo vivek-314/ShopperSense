@@ -255,7 +255,7 @@ The [research error analysis](results/error_analysis.json) shows the first four 
 
 ### [Open the live prediction workspace →](https://vivek-314.github.io/ShopperSense-study/)
 
-The website is a single page: the hero contains the working predictor, followed by the workflow, input guide, research, interactive threshold lab and reproducibility resources. Detailed evidence is expandable. Older `research.html` links redirect to the corresponding section. No Python installation, model selection or threshold adjustment is required to use the app.
+The website is a single page: the hero contains the working predictor, followed by the workflow, input guide, research, interactive threshold lab and reproducibility resources. Detailed evidence is expandable. Use **Light mode / Dark mode** in the header to switch appearance. The site follows your device preference on first visit and remembers your selection. Older `research.html` links redirect to the corresponding section. No Python installation, model selection or threshold adjustment is required to use the app.
 
 1. Choose **One session** and enter the six observed values. All times are in seconds; zero means no recorded activity in that category.
 2. Select **Predict purchase** to see a purchase/no-purchase label, a score out of 100, influential inputs and a review-priority suggestion. Editing an input marks the old result stale until rescored.

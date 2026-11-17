@@ -6,7 +6,8 @@
   <meta name="description" content="Predict purchase intention from your own browsing-session data. Try the live six-input model, score a CSV, and explore the research on one page.">
   <meta name="theme-color" content="#040506">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="workspace.css?v=7">
+  <script src="theme.js?v=1"></script>
+  <link rel="stylesheet" href="workspace.css?v=8">
   <script src="predictor-engine.js?v=6" defer></script><script src="workspace.js?v=7" defer></script>
   <script src="threshold.js" defer></script><script src="app.js?v=7" defer></script>
   <script src="legacy-redirect.js" defer></script>
@@ -16,7 +17,7 @@
 <header class="header">
   <a class="brand" href="#workspace" aria-label="ShopperSense home" translate="no"><span class="brand-icon" aria-hidden="true"></span>ShopperSense</a>
   <nav aria-label="Main navigation"><a href="#workspace">Predict</a><a href="#how">How it works</a><a href="#research">The evidence</a></nav>
-  <a class="nav-source" href="https://github.com/vivek-314/ShopperSense-study">Source code <span aria-hidden="true">↗</span></a>
+  <div class="header-actions"><a class="nav-source" href="https://github.com/vivek-314/ShopperSense-study">Source code <span aria-hidden="true">↗</span></a><button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to light mode" hidden><span class="theme-symbol" aria-hidden="true"></span><span class="theme-label">Light mode</span></button></div>
 </header>
 <main>
 <section class="hero" id="workspace" tabindex="-1" aria-labelledby="hero-title">
