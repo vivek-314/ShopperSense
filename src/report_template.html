@@ -1,60 +1,15 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A reproducible study of purchase classification from online browsing sessions: honest evaluation, error analysis, and an interactive validation threshold lab.">
-  <meta name="theme-color" content="#193e35">
-  <title>ShopperSense — From browsing to buying</title>
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css">
-  <script src="threshold.js" defer></script>
-  <script src="app.js" defer></script>
-</head>
-<body>
-<a class="skip-link" href="#main">Skip to report</a>
-<header class="topbar">
-  <a class="brand" href="#overview" aria-label="ShopperSense overview"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Shopper<span>Sense</span><span class="brand-dot">.</span></a>
-  <span class="topbar-note">BROWSING BEHAVIOUR / PURCHASE INTENTION</span>
-  <a class="topbar-link" href="./">Predict new sessions <span aria-hidden="true">↗</span></a>
-</header>
-<div class="report-layout">
-<aside class="sidebar" aria-label="Report contents">
-  <div class="sidebar-inner">
-    <p class="eyebrow">THE RESEARCH REPORT</p>
-    <nav aria-label="Sections">
-      <a href="#overview" class="active"><span>00</span> Overview</a>
-      <a href="#data"><span>01</span> The dataset</a>
-      <a href="#preprocessing"><span>02</span> Preparation</a>
-      <a href="#methods"><span>03</span> The models</a>
-      <a href="#evaluation"><span>04</span> Fair evaluation</a>
-      <a href="#results"><span>05</span> What we found</a>
-      <a href="#mistakes"><span>06</span> A closer look</a>
-      <a href="#threshold"><span>07</span> Threshold lab <b class="nav-dot" aria-hidden="true"></b></a>
-      <a href="#conclusions"><span>08</span> Conclusions</a>
-      <a href="#reproduce"><span>09</span> Reproduce it</a>
-    </nav>
-    <div class="sidebar-foot"><span class="status-dot" aria-hidden="true"></span> Reproducible ML study<p>UCI Dataset 468<br>Seed 42 · Full-feature primary</p><a href="data/selection.json">Inspect the decision record ↗</a></div>
-  </div>
-</aside>
-<main id="main">
-<section id="overview" class="hero section">
-  <div class="hero-meta"><span class="pill"><span class="status-dot" aria-hidden="true"></span> AN UNDERGRADUATE ML INVESTIGATION</span><span class="edition">RESEARCH NOTE / 2026</span></div>
-  <div class="hero-grid">
-    <div><p class="eyebrow">FROM SESSION SIGNALS TO PURCHASE INTENTION</p><h1>What turns<br><em>browsing</em><br>into buying?</h1><p class="hero-deck">Can recorded browsing behaviour identify sessions that end in a purchase?</p><p class="hero-scope">One historical dataset. Three standard classifiers. A majority baseline. A careful look at what the evidence can—and cannot—tell us.</p><a class="button" href="#results">Read the findings <span aria-hidden="true">↓</span></a><a class="text-link" href="#threshold">Try the threshold lab ↗</a></div>
-    <div class="hero-insight"><div class="insight-top"><span>THE HELD-OUT RESULT</span><span class="small-spark" aria-hidden="true">✳</span></div><p class="hero-metric">{{test_ap}}<span>average precision</span></p><div class="score-scale" aria-hidden="true"><span></span></div><p class="insight-model">{{selected_model}}<br><span>Full features · final test partition</span></p><div class="insight-divider"></div><p class="insight-bottom"><span class="tag">THE CATCH</span>Session summaries are informative. Their availability early enough to act is a separate question.</p><span class="insight-index" aria-hidden="true">01 / 04</span></div>
-  </div>
-  <div class="stat-strip"><div><strong>{{session_count}}</strong><span>recorded sessions</span></div><div><strong>17</strong><span>input features</span></div><div><strong>{{purchase_rate}}</strong><span>purchase prevalence</span></div><div><strong>70 / 15 / 15</strong><span>train / validation / test</span></div></div>
-  <div class="answer-callout"><span class="callout-label">THE BRIEF ANSWER</span><p>{{brief_answer}}</p></div>
-  <p class="provenance">GENERATED RUN <code>{{run_id}}</code><span>DATA SHA-256 <code>{{hash_prefix}}…</code></span><a href="data/summary.json">Machine-readable evidence ↗</a></p>
-  <div class="scope-note"><strong>What one row means.</strong> A recorded browsing session; Revenue = 1 means purchase, 0 means no purchase. Inputs are session summaries, so these results do not establish early-session prediction. Associations within this dataset do not prove causes or conversion uplift.</div>
-  {{predictor_section}}
+<div class="research-body">
+<section id="research" class="research-intro section" aria-labelledby="research-title">
+  <p class="eyebrow">THE EVIDENCE BEHIND THE EXPERIENCE</p><h2 id="research-title">A useful prediction starts<br>with an honest evaluation.</h2>
+  <p class="section-intro" id="overview">Can recorded browsing behaviour identify sessions that end in a purchase? We compare three standard classifiers against a majority baseline on one historical dataset.</p>
+  <div class="scope-note"><strong>One row. One session. One outcome.</strong><p>Revenue = 1 means purchase; 0 means no purchase. The input values summarize a recorded session. This study supports association within this dataset, not claims about motives, conversion uplift or early-session prediction.</p></div>
+  <nav class="research-navigation" aria-label="Research sections"><a href="#data">Dataset</a><a href="#preprocessing">Preparation</a><a href="#methods">Models</a><a href="#evaluation">Evaluation</a><a href="#results">Results</a><a href="#mistakes">Errors</a><a href="#threshold">Threshold lab</a><a href="#conclusions">Limitations</a><a href="#reproduce">Reproduce</a></nav>
+  <details><summary>How the six-input predictor differs from the full-feature study</summary>{{predictor_section}}</details>
 </section>
-
 <section id="data" class="section">
   <div class="section-label"><span>01</span> THE DATASET</div><h2>A session is a story.<br>This dataset is its summary.</h2><p class="section-intro">The UCI Online Shoppers Purchasing Intention Dataset records browsing activity and whether the session ended in a purchase. We inspect the supplied file before using the source description as evidence.</p>
   <div class="data-card"><div><span class="eyebrow">VERIFIED LOCAL FILE</span><h3>Online Shoppers<br>Purchasing Intention</h3><p>{{session_count}} sessions · {{purchase_count}} purchases<br>17 predictors + Revenue target</p></div><div><dl><dt>Source</dt><dd>UCI Machine Learning Repository · dataset 468</dd><dt>Creators / attribution</dt><dd>C. Sakar &amp; Yomi Kastro (2018)</dd><dt>License</dt><dd><a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></dd><dt>Dataset DOI</dt><dd><a href="https://doi.org/10.24432/C5F88Q">10.24432/C5F88Q ↗</a></dd></dl><a class="text-link" href="https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset">Read the original source ↗</a></div></div>
-  <h3>The feature inventory</h3>
+  <details><summary>All 17 source variables &amp; their treatment</summary><h3>The feature inventory</h3>
   <div class="table-wrap" tabindex="0" role="region" aria-label="All 17 predictors and their meanings"><table><caption>Predictors · Revenue is excluded from every model input</caption><thead><tr><th scope="col">Features</th><th scope="col">What they record</th><th scope="col">Treatment</th></tr></thead><tbody>
     <tr><th scope="row">Administrative, Informational, ProductRelated</th><td>Page counts for three browsing categories</td><td>Numeric</td></tr>
     <tr><th scope="row">Administrative_Duration, Informational_Duration, ProductRelated_Duration</th><td>Total time spent in each page category</td><td>Numeric</td></tr>
@@ -67,15 +22,15 @@
     <tr><th scope="row">VisitorType</th><td>Returning_Visitor, New_Visitor, or Other</td><td>One-hot category</td></tr>
     <tr><th scope="row">Weekend</th><td>Whether the visit occurred on a weekend</td><td>Explicit 0/1</td></tr>
   </tbody></table></div>
-  <h3>Quality is a result, too.</h3><p>{{quality_summary}}</p>{{quality_details}}<p>Large counts and durations are unusual but plausible. We preserve source rows and large values, report the duplicates, and inspect training distributions. Numeric category codes are never treated as ordered measurements. <a href="data/quality.json">Full quality report ↗</a></p>
+  </details><h3>Quality is a result, too.</h3><p>{{quality_summary}}</p><details><summary>Inspect the measured quality checks</summary>{{quality_details}}</details><p>Large counts and durations are unusual but plausible. We preserve source rows and large values, report the duplicates, and inspect training distributions. Numeric category codes are never treated as ordered measurements. <a href="data/quality.json">Full quality report ↗</a></p>
   {{class_figure}}
-  <h3>Explore using training data</h3><p>Structural counts above describe the entire file. The following exploratory comparisons use only the training partition; they do not use validation or test outcomes to choose preprocessing.</p>
-  {{visitor_figure}}{{visitor_table}}{{intensity_figure}}{{intensity_table}}
+  <details><summary>Explore training-only patterns &amp; distributions</summary><h3>Explore using training data</h3><p>Structural counts above describe the entire file. The following exploratory comparisons use only the training partition; they do not use validation or test outcomes to choose preprocessing.</p>
+  {{visitor_figure}}{{visitor_table}}{{intensity_figure}}{{intensity_table}}</details>
 </section>
 
 <section id="preprocessing" class="section">
   <div class="section-label"><span>02</span> PREPARATION</div><h2>Prepare the inputs.<br>Protect the holdout.</h2><p class="section-intro">Every learned transformation sits inside a scikit-learn Pipeline and ColumnTransformer. Each CV fold fits its own preprocessing using only that fold’s training rows.</p>
-  <div class="table-wrap" tabindex="0" role="region" aria-label="Preprocessing choices and rationale"><table><caption>One consistent preprocessing contract</caption><thead><tr><th scope="col">Choice</th><th scope="col">Implementation</th><th scope="col">Why</th></tr></thead><tbody>
+  <details><summary>Preprocessing choices &amp; statistical rationale</summary><div class="table-wrap" tabindex="0" role="region" aria-label="Preprocessing choices and rationale"><table><caption>One consistent preprocessing contract</caption><thead><tr><th scope="col">Choice</th><th scope="col">Implementation</th><th scope="col">Why</th></tr></thead><tbody>
     <tr><th scope="row">Numeric missingness</th><td>Training median, if needed</td><td>Retain rows without learning from the holdout; no missing values observed here</td></tr>
     <tr><th scope="row">Categorical missingness</th><td>Fixed __missing__ category</td><td>Make missingness explicit; no missing values observed here</td></tr>
     <tr><th scope="row">Category encoding</th><td>OneHotEncoder; ignore unknown categories</td><td>Codes are labels, not distances; vocabulary is fitted on training folds</td></tr>
@@ -84,7 +39,7 @@
     <tr><th scope="row">Target and row identity</th><td>Explicit Revenue 0/1; source_row_id from original row order</td><td>Neither the target nor the identifier enters the predictors</td></tr>
     <tr><th scope="row">Imbalance and extremes</th><td>Stratification; no resampling, class weights, or outlier removal</td><td>Keep the core comparison simple; inspect precision/recall and threshold choices</td></tr>
   </tbody></table></div>
-  <aside class="note"><span class="note-icon" aria-hidden="true">!</span><div><h4>A useful feature is not automatically an available feature.</h4><p>UCI describes PageValues as an analytics measure associated with pages visited before transactions. That definition warrants a timing audit; it does not prove this file leaks the target. We prespecify a with/without experiment. Counts, durations, bounce and exit summaries may also develop during or after a session.</p></div></aside>
+  </details><div class="note" role="note"><span class="note-icon" aria-hidden="true">!</span><div><h3>A useful feature is not automatically an available feature.</h3><p>UCI describes PageValues as an analytics measure associated with pages visited before transactions. That definition warrants a timing audit; it does not prove this file leaks the target. We prespecify a with/without experiment. Counts, durations, bounce and exit summaries may also develop during or after a session.</p></div></div>
 </section>
 
 <section id="methods" class="section">
@@ -108,22 +63,22 @@
 
 <section id="results" class="section">
   <div class="section-label"><span>05</span> WHAT WE FOUND</div><h2>Better than the baseline.<br>Still far from every buyer.</h2><p class="section-intro">Validation makes the choices. Test provides the final comparison. The tables include every primary classifier and both prespecified feature-removal variants, with purchase-class metrics and support.</p>
-  <h3>First: the validation evidence</h3>{{validation_table}}
-  <h3>Then: the untouched primary test</h3><p>{{test_ranking_text}}</p>{{test_table}}<p class="muted">AP and ROC-AUC do not change when only the classification threshold changes. Dummy predicts no buyers at 0.50: precision is undefined and displayed as 0 by the zero_division convention; recall and F1 are 0.</p>
+  <details><summary>Validation selection: every model &amp; feature condition</summary><h3>First: the validation evidence</h3>{{validation_table}}</details>
+  <h3>Then: the untouched primary test</h3><p>{{test_ranking_text}}</p><details><summary>Full test metrics, support &amp; confusion counts</summary>{{test_table}}</details><p class="muted">AP and ROC-AUC do not change when only the classification threshold changes. Dummy predicts no buyers at 0.50: precision is undefined and displayed as 0 by the zero_division convention; recall and F1 are 0.</p>
   {{pr_figure}}{{confusion_figure}}{{confusion_table}}
-  <h3>Does a deeper tree generalize?</h3>{{depth_figure}}{{depth_table}}
+  <details><summary>Tree depth: training fit versus generalization</summary><h3>Does a deeper tree generalize?</h3>{{depth_figure}}{{depth_table}}</details>
 </section>
 
 <section id="mistakes" class="section">
   <div class="section-label"><span>06</span> A CLOSER LOOK</div><h2>The mistakes deserve<br>their own explanation.</h2><p class="section-intro">{{error_text}}</p>
-  {{error_examples}}<p class="muted">These are the first four source rows in each error category, sorted by original zero-based source_row_id. Scores are rounded only for display. Features are observed session summaries; we cannot infer why a visitor did or did not buy.</p>
-  <h3>Do errors look the same across groups?</h3><p>{{bin_text}}</p>{{subgroup_table}}<p>Compare missed purchases using FN / buyers and false alarms using FP / non-buyers. Small denominators make these rates unstable. These exploratory subgroup counts do not establish discrimination, motives, or causal effects; no uncertainty intervals or significance claims are made.</p>
-  <h3>How much does PageValues matter?</h3><p>{{pagevalues_text}}</p>{{pagevalues_figure}}<p>The full-feature condition remains the prespecified primary study. Logistic Regression and Random Forest were retrained without PageValues using identical primary rows and their original bounded training-CV grids. Validation dependence was inspected before freezing; final test variants were evaluated without changing the primary model.</p>
-  <h3>What about those repeated sessions?</h3>{{overlap_table}}<p>Identical predictors can straddle the primary split even though source row IDs are disjoint. This can make evaluation easier. We preserve the original split and add a separate group-aware sensitivity rather than silently deduplicating the data.</p><p>{{group_text}}</p>{{group_table}}
+  <details><summary>Inspect representative prediction errors</summary>{{error_examples}}<p class="muted">These are the first four source rows in each error category, sorted by original zero-based source_row_id. Scores are rounded only for display. Features are observed session summaries; we cannot infer why a visitor did or did not buy.</p>
+  </details><details><summary>Error rates by visitor type &amp; browsing intensity</summary><h3>Do errors look the same across groups?</h3><p>{{bin_text}}</p>{{subgroup_table}}<p>Compare missed purchases using FN / buyers and false alarms using FP / non-buyers. Small denominators make these rates unstable. These exploratory subgroup counts do not establish discrimination, motives, or causal effects; no uncertainty intervals or significance claims are made.</p>
+  </details><h3>How much does PageValues matter?</h3><p>{{pagevalues_text}}</p>{{pagevalues_figure}}<p>The full-feature condition remains the prespecified primary study. Logistic Regression and Random Forest were retrained without PageValues using identical primary rows and their original bounded training-CV grids. Validation dependence was inspected before freezing; final test variants were evaluated without changing the primary model.</p>
+  <details><summary>Duplicate overlap &amp; the group-aware sensitivity check</summary><h3>What about those repeated sessions?</h3>{{overlap_table}}<p>Identical predictors can straddle the primary split even though source row IDs are disjoint. This can make evaluation easier. We preserve the original split and add a separate group-aware sensitivity rather than silently deduplicating the data.</p><p>{{group_text}}</p>{{group_table}}</details>
 </section>
 
 <section id="threshold" class="section threshold-section">
-  <div class="section-label"><span>07</span> THE THRESHOLD LAB</div><div class="lab-heading"><div><h2>A different cutoff.<br>A different kind of mistake.</h2><p class="section-intro">Explore the selected model’s actual validation scores. A session is predicted to purchase when its score is greater than or equal to your threshold.</p></div><span class="lab-badge">INTERACTIVE<br>VALIDATION ONLY</span></div>
+  <div class="section-label"><span>07</span> THE THRESHOLD LAB</div><div class="lab-heading"><div><h2>A different cutoff.<br>A different kind of mistake.</h2><p class="section-intro">This separate research interaction uses the full-feature model’s historical validation scores. It does not change the six-input predictor at the top. A session is predicted to purchase when its score is greater than or equal to your threshold.</p></div></div>
   <div class="lab" id="threshold-lab" aria-busy="true">
     <div class="lab-top"><div><span class="eyebrow">VALIDATION EXPLORATION</span><h3>{{selected_model}} <span>· full features</span></h3><p id="lab-support">Loading the actual validation scores…</p></div><button class="button secondary" type="button" id="reset-threshold" disabled>Reset to 0.50 <span aria-hidden="true">↺</span></button></div>
     <div id="lab-error" class="lab-error" role="alert" hidden></div>
@@ -145,20 +100,17 @@
 <section id="reproduce" class="section">
   <div class="section-label"><span>09</span> REPRODUCE &amp; CREDITS</div><h2>Follow every number<br>back to a row.</h2><p class="section-intro">The source bundle includes the real dataset, deterministic split IDs, complete CV candidates, unrounded row-level predictions, metrics, figures, code, notebooks, tests and deployment workflow.</p>
   {{repo_access}}<div class="download-actions"><a class="button" href="assets/reproducibility.zip" download>Download source &amp; evidence <span aria-hidden="true">↓</span></a><a class="text-link" href="data/test_metrics.csv" download>Test results CSV ↗</a></div>
-  <div class="code-block"><span>FROM THE REPOSITORY ROOT · PYTHON 3.12</span><pre><code>python -m venv .venv
+  <p><a class="text-link" href="https://github.com/vivek-314/ShopperSense-study/blob/main/notebooks/03_six_input_models_step_by_step.ipynb">Open the cell-by-cell six-input model notebook ↗</a></p><details><summary>Run commands, provenance &amp; data integrity</summary><div class="code-block"><span>FROM THE REPOSITORY ROOT · PYTHON 3.12</span><pre><code>python -m venv .venv
 # Activate: .venv\Scripts\Activate.ps1 (PowerShell)
 # or: source .venv/bin/activate (macOS / Linux)
 python -m pip install -r requirements.txt
 python -m src.run_all --data data/raw/online_shoppers_intention.csv
 python -m pytest -q
 python -m http.server 8000 --directory docs</code></pre></div>
-  <p>The measured model-training and evaluation stage took {{runtime}} seconds on the implementation machine; runtime depends on hardware. Notebooks read and analyze the generated artifacts through shared source functions; the pipeline command performs the training. Run instructions and the exact dependency lock are included in the README.</p>
+  <p>The measured model-training and evaluation stage took {{runtime}} seconds on the implementation machine; runtime depends on hardware. Notebooks 01 and 02 inspect the research artifacts through shared source functions. Notebook 03 trains and evaluates all four six-input models in separate executed cells; its outputs are checked against the deployed model. Run instructions and the exact dependency lock are included in the README.</p>
+  <p><strong>Saved research model run:</strong> <code>{{run_id}}</code>. This redesigned page and its figures are generated from that frozen run's saved results. Presentation changes do not retrain the model or replace its recorded training-source identifier.</p>
   <p><strong>Data integrity:</strong> <code class="hash">{{data_hash}}</code></p><p>Dataset source metadata and CC BY 4.0 attribution were checked on 16 November 2026. The file was supplied locally; its original retrieval date is unknown. The checksum identifies the supplied bytes; it is not a claim of byte-for-byte comparison against a newly downloaded UCI archive.</p>
-  <h3>Credits &amp; AI-use disclosure</h3><p>The requester supplied the PRD and local CSV. Codex implemented the Python pipeline, website, notebooks, documentation and automated checks, and executed the verification recorded in the repository. No human review or contributor identities are asserted. Authors should add their actual names and accurately describe their own review before submission.</p>
+  </details><h3>Credits &amp; AI-use disclosure</h3><p>We developed ShopperSense as a course project to explore how browsing behaviour relates to online purchase intent. We used AI tools, including ChatGPT and Codex, to assist with planning, code generation, debugging, documentation, and website development. AI-generated code and suggestions supported the project; responsibility for the submitted work, its interpretation, and its limitations remains mine.</p>
   <h3>References actually consulted</h3><ul class="references"><li><a href="https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset">Sakar &amp; Kastro (2018). UCI Online Shoppers Purchasing Intention Dataset.</a> Data definitions, attribution, counts and license.</li><li><a href="https://scikit-learn.org/stable/modules/model_evaluation.html">Scikit-learn: Metrics and scoring.</a> Purchase-class evaluation and AP terminology.</li><li><a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages">GitHub Pages documentation.</a> Static-site deployment; the bundled workflow publishes docs/.</li></ul>
-  <div class="final-note"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><p>ShopperSense<span>A modest model comparison. An inspectable chain of evidence.</span></p><a href="#overview">Back to the question ↑</a></div>
 </section>
-<footer>Research, not a commercial predictor.<span>{{run_id}} · source hash {{hash_prefix}}</span></footer>
-</main></div>
-</body>
-</html>
+</div>

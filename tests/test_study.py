@@ -161,7 +161,7 @@ def test_site_payload_exact_scores_and_required_sections(study):
     assert payload['partition'] == 'validation'
     assert payload['source_row_id'] == sub.source_row_id.tolist()
     assert payload['purchase_score'] == sub.purchase_score.tolist()
-    html = (ROOT/'docs/research.html').read_text(encoding='utf-8')
+    html = (ROOT/'docs/index.html').read_text(encoding='utf-8')
     assert '{{' not in html
     for section in ['overview', 'data', 'preprocessing', 'methods', 'evaluation', 'results', 'mistakes', 'threshold', 'conclusions', 'reproduce']:
         assert f'id="{section}"' in html

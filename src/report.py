@@ -14,7 +14,7 @@ from sklearn.metrics import precision_recall_curve
 
 from .config import ROOT
 
-COLORS = ['#263b42', '#ba694b', '#397b68']
+COLORS = ['#e6e6e6', '#a3a3a3', '#77797d']
 
 
 def read_json(path):
@@ -36,24 +36,29 @@ def table(headers, rows, caption='', classes=''):
 
 
 def figure(name, caption, alt):
-    return f'<figure><img src="assets/{name}.svg" alt="{html.escape(alt)}" loading="lazy" width="900" height="540"><figcaption>{caption}</figcaption></figure>'
+    header = (ROOT/'results/figures'/f'{name}.png').read_bytes()[:24]
+    width, height = int.from_bytes(header[16:20], 'big'), int.from_bytes(header[20:24], 'big')
+    return f'<figure><img src="assets/{name}.png" alt="{html.escape(alt)}" loading="lazy" width="{width}" height="{height}"><figcaption>{caption}</figcaption></figure>'
 
 
 def make_figures(output, docs, frame, parts, summary):
     dest = output/'figures'
     dest.mkdir(exist_ok=True)
-    plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 11, 'axes.spines.top': False, 'axes.spines.right': False, 'axes.edgecolor': '#c6ccc5', 'axes.labelcolor': '#344b4c', 'text.color': '#243b3d', 'xtick.color': '#526463', 'ytick.color': '#526463', 'figure.facecolor': '#fbfcf8', 'axes.facecolor': '#fbfcf8', 'svg.fonttype': 'none'})
+    plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 11, 'axes.spines.top': False, 'axes.spines.right': False, 'axes.edgecolor': '#454647', 'axes.labelcolor': '#b9b9bb', 'text.color': '#e6e6e6', 'xtick.color': '#b9b9bb', 'ytick.color': '#b9b9bb', 'figure.facecolor': '#07080a', 'axes.facecolor': '#07080a', 'legend.facecolor': '#07080a', 'svg.fonttype': 'none', 'svg.hashsalt': 'ShopperSense'})
 
     def save(name, fig):
         fig.tight_layout(pad=1.5)
         fig.savefig(dest/f'{name}.svg', metadata={'Date': None}, bbox_inches='tight')
+        svg = dest/f'{name}.svg'
+        svg.write_text('\n'.join(line.rstrip() for line in svg.read_text(encoding='utf-8').splitlines())+'\n', encoding='utf-8')
         fig.savefig(dest/f'{name}.png', dpi=160, bbox_inches='tight')
         shutil.copyfile(dest/f'{name}.svg', docs/'assets'/f'{name}.svg')
+        shutil.copyfile(dest/f'{name}.png', docs/'assets'/f'{name}.png')
         plt.close(fig)
 
     fig, ax = plt.subplots(figsize=(8, 4.4))
     counts = frame.Revenue.value_counts().reindex([0, 1])
-    ax.barh(['No purchase', 'Purchase'], counts, color=['#cdd5cb', '#397b68'], height=.5)
+    ax.barh(['No purchase', 'Purchase'], counts, color=['#707174', '#e6e6e6'], height=.5)
     for i, count in enumerate(counts):
         ax.text(count+100, i, f'{count:,} ({count/len(frame):.1%})', va='center')
     ax.set_xlim(0, counts.max()*1.3)
@@ -76,7 +81,7 @@ def make_figures(output, docs, frame, parts, summary):
     intensity_rows = []
     fig, ax = plt.subplots(figsize=(8, 4.4))
     bins = np.linspace(0, np.log1p(train.ProductRelated.max()), 32)
-    for y, color in [(0, '#7a9393'), (1, '#397b68')]:
+    for y, color in [(0, '#77797d'), (1, '#e6e6e6')]:
         subset = train[train.Revenue == y].ProductRelated
         ax.hist(np.log1p(subset), bins=bins, density=True, alpha=.5, color=color, label=f'{"Purchase" if y else "No purchase"} (n={len(subset):,})')
         intensity_rows.append({'Revenue': y, 'support': len(subset), 'median': float(subset.median()), 'p95': float(subset.quantile(.95)), 'max': int(subset.max())})
@@ -88,15 +93,15 @@ def make_figures(output, docs, frame, parts, summary):
 
     predictions = pd.read_csv(output/'test_predictions.csv')
     fig, ax = plt.subplots(figsize=(8, 4.8))
-    for name, color in zip(['Logistic Regression', 'Decision Tree', 'Random Forest'], COLORS):
+    for name, color, line in zip(['Logistic Regression', 'Decision Tree', 'Random Forest'], COLORS, ['-', '--', '-.']):
         sub = predictions[(predictions.model == name) & (predictions.feature_set == 'full') & (predictions.threshold == .5)]
         precision, recall, _ = precision_recall_curve(sub.y_true, sub.purchase_score)
         ap = next(r['ap'] for r in summary['test_metrics'] if r['model'] == name and r['feature_set'] == 'full' and r['threshold'] == .5)
-        ax.step(recall, precision, where='post', color=color, label=f'{name} · AP {ap:.3f}', lw=1.8)
+        ax.step(recall, precision, where='post', color=color, linestyle=line, label=f'{name} · AP {ap:.3f}', lw=1.8)
     prevalence = predictions[(predictions.model == 'Dummy')].y_true.mean()
-    ax.axhline(prevalence, color='#83908a', ls='--', label=f'Purchase prevalence {prevalence:.3f}')
+    ax.axhline(prevalence, color='#b9b9bb', ls=':', label=f'Purchase prevalence {prevalence:.3f}')
     ax.set(xlabel='Recall · purchase class', ylabel='Precision · purchase class', xlim=(0, 1), ylim=(0, 1.04))
-    ax.legend(frameon=False, fontsize=9, loc='lower left')
+    ax.legend(frameon=True, facecolor='#07080a', edgecolor='none', framealpha=1, fontsize=9, loc='lower left')
     save('precision_recall', fig)
 
     selected = summary['selection']['selected_model']
@@ -105,16 +110,16 @@ def make_figures(output, docs, frame, parts, summary):
     for ax, cut in zip(axes, [.5, threshold]):
         r = next(r for r in summary['test_metrics'] if r['model'] == selected and r['feature_set'] == 'full' and r['threshold'] == cut)
         matrix = [[r['tn'], r['fp']], [r['fn'], r['tp']]]
-        ax.imshow(matrix, cmap='Greens', vmin=0, vmax=max(r['tn'], r['tp']))
+        ax.imshow(matrix, cmap='Greys', vmin=0, vmax=max(r['tn'], r['tp']))
         for y in range(2):
             for x in range(2):
-                ax.text(x, y, f'{["TN", "FP", "FN", "TP"][y*2+x]}\n{matrix[y][x]:,}', ha='center', va='center', fontsize=14, color='white' if y == 0 and x == 0 else '#173f35')
+                ax.text(x, y, f'{["TN", "FP", "FN", "TP"][y*2+x]}\n{matrix[y][x]:,}', ha='center', va='center', fontsize=14, color='white' if y == 0 and x == 0 else '#111214')
         ax.set(xticks=[0, 1], yticks=[0, 1], xticklabels=['No purchase', 'Purchase'], yticklabels=['No purchase', 'Purchase'], xlabel='Predicted label', ylabel='Actual label', title=f'Threshold {cut:.2f}')
     save('confusion', fig)
 
     depth = pd.read_csv(output/'tree_depth_comparison.csv')
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    for partition, color in [('train', '#397b68'), ('validation', '#ba694b')]:
+    for partition, color in [('train', '#e6e6e6'), ('validation', '#9c9c9d')]:
         sub = depth[depth.partition == partition]
         ax.plot(sub.max_depth, sub.f1, marker='o', label=partition.title(), color=color, lw=2)
     ax.set(xlabel='Tree maximum depth · min_samples_leaf=5', ylabel='Purchase F1 · fixed threshold 0.50', ylim=(0, 1))
@@ -122,7 +127,7 @@ def make_figures(output, docs, frame, parts, summary):
     save('tree_depth', fig)
 
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    for offset, feature_set, color, label in [(-.18, 'full', '#397b68', 'Full features'), (.18, 'no_PageValues', '#ba694b', 'Without PageValues')]:
+    for offset, feature_set, color, label in [(-.18, 'full', '#e6e6e6', 'Full features'), (.18, 'no_PageValues', '#77797d', 'Without PageValues')]:
         values = [next(r['ap'] for r in summary['test_metrics'] if r['model'] == name and r['feature_set'] == feature_set and r['threshold'] == .5) for name in ['Logistic Regression', 'Random Forest']]
         bars = ax.bar(np.arange(2)+offset, values, .34, color=color, label=label)
         ax.bar_label(bars, fmt='%.3f', padding=4)
@@ -206,10 +211,18 @@ def generate_report(output, docs, frame, parts):
         template = template.replace('{{'+key+'}}', str(value))
     if '{{' in template:
         raise ValueError('Unresolved report template variable')
-    (docs/'research.html').write_text(template, encoding='utf-8')
     workspace = ROOT/'src/predictor/workspace.html'
-    if workspace.exists():
-        shutil.copyfile(workspace, docs/'index.html')
+    shell = workspace.read_text(encoding='utf-8')
+    if shell.count('{{research_content}}') != 1:
+        raise ValueError('The single-page shell must contain one research content slot')
+    page = shell.replace('{{research_content}}', template)
+    (docs/'index.html').write_text(page, encoding='utf-8')
+    # Old report links retain their fragments, but all content lives on one page.
+    (docs/'research.html').write_text('''<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#040506"><title>ShopperSense — Research has moved</title>
+<link rel="stylesheet" href="workspace.css?v=7"><script src="legacy-redirect.js" defer></script></head>
+<body class="redirect-page"><main><h1>The research is now on the main page.</h1><p>The predictor, results and evidence are together in one place.</p><a class="button primary" href="./#research">Open ShopperSense research</a></main></body></html>''', encoding='utf-8')
     (docs/'.nojekyll').touch()
     for name in ['data_manifest.json', 'quality.json', 'selection.json', 'test_metrics.csv', 'validation_metrics.csv', 'pagevalues_comparison.csv', 'error_analysis.json', 'cv_results.csv', 'splits.json', 'threshold_grid.csv']:
         shutil.copyfile(output/name, docs/'data'/name)
@@ -228,12 +241,12 @@ def predictor_evidence(docs):
     deployed = read_json(path)
     row = deployed['test_metrics']
     rows = [{'model': deployed['model_name'], 'feature_set': 'six_observable_inputs', 'partition': 'test', **row}]
-    return f'''<aside class="decision-box" id="workspace-model"><span class="eyebrow">THE DEPLOYED PREDICTION WORKSPACE IS A SEPARATE MODEL</span>
+    return f'''<div class="decision-box" id="workspace-model" role="note"><span class="eyebrow">THE DEPLOYED PREDICTION WORKSPACE IS A SEPARATE MODEL</span>
 <h3>Six inputs for new sessions</h3><p>The <a href="./">prediction workspace</a> accepts individual inputs and CSV files from outside this dataset. It runs a separately trained {deployed['model_name']} using ProductRelated, ProductRelated_Duration, Informational, Informational_Duration, VisitorType and Weekend. Administrative and Administrative_Duration were removed from the deployed predictor at the user’s request. Their earlier eight-input results are archived for a measured comparison. No unshown features are filled with defaults. PageValues, bounce/exit rates and the technical category codes are excluded.</p>
-<p>This product model's test AP is <strong>{row['ap']:.3f}</strong>, compared with the full-feature research result shown above. Its frozen validation-selected threshold is {deployed['threshold']:.2f}. It found {row['tp']} of {row['purchases']} actual buyers, with {row['fp']} false alarms among {row['predicted_purchases']} flagged sessions. Its score is an uncalibrated model output, not a guaranteed purchase probability. The original benchmark's stronger metrics must never be attributed to this predictor.</p>
+<p>This product model's test AP is <strong>{row['ap']:.3f}</strong>, compared with the full-feature research result documented below. Its frozen validation-selected threshold is {deployed['threshold']:.2f}. It found {row['tp']} of {row['purchases']} actual buyers, with {row['fp']} false alarms among {row['predicted_purchases']} flagged sessions. Its score is an uncalibrated model output, not a guaranteed purchase probability. The original benchmark's stronger metrics must never be attributed to this predictor.</p>
 <p>All three classifiers were tuned on the original training rows with the same bounded three-fold AP searches. Validation selected the model and threshold before this condition's test evaluation. The historical test split is reused from the research project, not an independent external validation. New stores, future sessions and early-session use remain unvalidated.</p>
 <p>Python/JavaScript parity is checked on all 3,700 validation/test rows and three constructed fresh sessions. Forest inference uses the fitted numeric/category preprocessing and float32 tree comparisons. Signed path contributions sum to score minus the mean root score; they are model attributions, not causal effects.</p>
-<p>Product version: <code>{deployed['run_id']}</code>. Its complete CV, selection, predictions and metrics are in <code>results/predictor/</code> in the downloadable source bundle.</p></aside>'''+metric_table(rows, 'Deployed six-input predictor · its own final test performance')
+<p>Product version: <code>{deployed['run_id']}</code>. Its complete CV, selection, predictions and metrics are in <code>results/predictor/</code> in the downloadable source bundle.</p></div>'''+metric_table(rows, 'Deployed six-input predictor · its own final test performance')
 
 
 def model_comparison_text(summary, best_test, selected):
@@ -245,7 +258,7 @@ def model_comparison_text(summary, best_test, selected):
 def example_tables(errors):
     content = ''
     for error, rows in errors['examples'].items():
-        content += f'<h4>{"False positives · predicted buyers who did not purchase" if error == "FP" else "False negatives · missed actual buyers"}</h4>'
+        content += f'<h3>{"False positives · predicted buyers who did not purchase" if error == "FP" else "False negatives · missed actual buyers"}</h3>'
         content += table(['Source row ID', 'Visitor type', 'Product pages', 'Product duration', 'PageValues', 'Actual', 'Score', 'Predicted'], [[r['source_row_id'], r['VisitorType'], r['ProductRelated'], f'{r["ProductRelated_Duration"]:.1f}', f'{r["PageValues"]:.2f}', r['Revenue'], fmt(r['purchase_score'], 6), r['predicted_label']] for r in rows], f'{error} examples · first four source row IDs') if rows else '<p>No errors in this category.</p>'
     return content
 
@@ -275,7 +288,7 @@ def make_bundle(output, docs):
                 if not path.is_file() or any(p in path.parts for p in ['__pycache__', 'models', 'browser-qa', '.ipynb_checkpoints']) or path.name == 'reproducibility.zip' or path.name.startswith('executed_'):
                     continue
                 bundle.write(path, path.relative_to(ROOT))
-        for name in ['README.md', 'PRD.md', 'requirements.txt', 'requirements-lock.txt', 'site_config.json', '.gitignore', '.gitattributes']:
+        for name in ['README.md', 'PRD.md', 'DESIGN.md', 'requirements.txt', 'requirements-lock.txt', 'site_config.json', '.gitignore', '.gitattributes']:
             path = ROOT/name
             if path.exists():
                 bundle.write(path, name)

@@ -43,12 +43,23 @@ def verify(compare_first=False):
                     path = path/'index.html'
                 assert path.is_file(), f'Missing local asset: {link}'
                 local.append(link)
+                if parsed.fragment and path.suffix == '.html':
+                    target = Links()
+                    target.feed(path.read_text(encoding='utf-8'))
+                    assert parsed.fragment in target.ids, f'Broken cross-document anchor: {link}'
             elif parsed.fragment:
                 assert parsed.fragment in parser.ids, f'Broken anchor: {link}'
+    index = (ROOT/'docs/index.html').read_text(encoding='utf-8')
+    assert 'href="research.html' not in index, 'Content navigation must stay on the single page'
+    assert '{{' not in index, 'Unresolved single-page template token'
+    for section in ['workspace', 'single-panel', 'bulk-panel', 'how', 'guide', 'reliability', 'research', 'data', 'preprocessing', 'methods', 'evaluation', 'results', 'mistakes', 'threshold', 'conclusions', 'reproduce']:
+        assert f'id="{section}"' in index, f'Single-page content missing: {section}'
+    legacy = (ROOT/'docs/research.html').read_text(encoding='utf-8')
+    assert 'legacy-redirect.js' in legacy and './#research' in legacy
     with zipfile.ZipFile(ROOT/'docs/assets/reproducibility.zip') as bundle:
         assert bundle.testzip() is None
         names = bundle.namelist()
-        for required in ['README.md', 'requirements.txt', 'PRD.md', 'data/raw/online_shoppers_intention.csv', 'src/run_all.py', 'src/report_template.html', 'notebooks/01_data_and_reasoning.ipynb', 'notebooks/02_models_and_results.ipynb', 'results/test_predictions.csv', 'results/selection.json', '.github/workflows/pages.yml', 'scripts/verify_artifacts.py', 'docs/index.html', 'docs/research.html', 'docs/data/predictor.json', 'docs/predictor-engine.js', 'docs/workspace.js', 'src/predictor/train.py', 'results/predictor/selection.json']:
+        for required in ['README.md', 'DESIGN.md', 'requirements.txt', 'PRD.md', 'data/raw/online_shoppers_intention.csv', 'src/run_all.py', 'src/report_template.html', 'notebooks/01_data_and_reasoning.ipynb', 'notebooks/02_models_and_results.ipynb', 'results/test_predictions.csv', 'results/selection.json', '.github/workflows/pages.yml', 'scripts/verify_artifacts.py', 'docs/index.html', 'docs/research.html', 'docs/legacy-redirect.js', 'docs/data/predictor.json', 'docs/predictor-engine.js', 'docs/workspace.js', 'src/predictor/train.py', 'results/predictor/selection.json']:
             assert required in names, f'Bundle missing {required}'
         for required in ['notebooks/03_six_input_models_step_by_step.ipynb', 'notebooks/README.md']:
             assert required in names, f'Bundle missing submission notebook: {required}'

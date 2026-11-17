@@ -4,7 +4,7 @@ ShopperSense uses machine learning to study browsing-session behaviour and predi
 
 **Live Website:** [Open the prediction workspace](https://vivek-314.github.io/ShopperSense-study/)
 
-**Research Report:** [Read the investigation and results](https://vivek-314.github.io/ShopperSense-study/research.html)
+**Research Report:** [Read the investigation and results](https://vivek-314.github.io/ShopperSense-study/#research)
 
 **Model Code:** [Explore the executed, cell-by-cell training notebook](notebooks/03_six_input_models_step_by_step.ipynb)
 
@@ -35,7 +35,7 @@ The data consists of historical session summaries. Performance partway through a
 
 ### A. Machine-learning research
 
-The research workflow audits the supplied dataset, explores training data, fits models through consistent pipelines, and compares their validation and test performance. It also studies errors, tree depth, removal of `PageValues`, and identical inputs crossing partition boundaries. The [research report](https://vivek-314.github.io/ShopperSense-study/research.html) explains these results without requiring readers to run a notebook.
+The research workflow audits the supplied dataset, explores training data, fits models through consistent pipelines, and compares their validation and test performance. It also studies errors, tree depth, removal of `PageValues`, and identical inputs crossing partition boundaries. The [research report](https://vivek-314.github.io/ShopperSense-study/#research) explains these results without requiring readers to run a notebook.
 
 ### B. Interactive prediction website
 
@@ -255,14 +255,14 @@ The [research error analysis](results/error_analysis.json) shows the first four 
 
 ### [Open the live prediction workspace →](https://vivek-314.github.io/ShopperSense-study/)
 
-No Python installation, model selection or threshold adjustment is required to use the published app.
+The website is a single page: the hero contains the working predictor, followed by the workflow, input guide, research, interactive threshold lab and reproducibility resources. Detailed evidence is expandable. Older `research.html` links redirect to the corresponding section. No Python installation, model selection or threshold adjustment is required to use the app.
 
-1. Choose **Predict a session** and enter the six observed values. All times are in seconds; zero means no recorded activity in that category.
+1. Choose **One session** and enter the six observed values. All times are in seconds; zero means no recorded activity in that category.
 2. Select **Predict purchase** to see a purchase/no-purchase label, a score out of 100, influential inputs and a review-priority suggestion. Editing an input marks the old result stale until rescored.
 3. Read the score as an uncalibrated model output. The label uses the fixed 12/100 cutoff; a positive label does not mean a verified probability above 50% or a confirmed sale.
-4. For multiple sessions, choose **Score a CSV**, download the [blank template](docs/assets/session-template.csv), and add one row per session. The app accepts up to **10,000 rows / 5 MB**, including original UCI header aliases.
+4. For multiple sessions, choose **CSV sessions**, download the [blank template](docs/assets/session-template.csv), and add one row per session. The app accepts up to **10,000 rows / 5 MB**, including original UCI header aliases.
 5. Review input errors, score valid rows, filter the ranked list, and download all results. The export preserves row numbers, inputs, unrounded scores, labels, errors and model version. Invalid rows remain present without invented scores. `Revenue` and extra fields, including legacy account columns, are ignored for prediction.
-6. Open **Research & accuracy** for the [research report](https://vivek-314.github.io/ShopperSense-study/research.html), or **Model notebook** for the actual training code. The report's separate validation threshold lab recomputes counts from saved validation scores; it does not retrain models or alter official test results. Its slider spans 0–1 in 0.01 steps, resets to 0.50 and marks the research choice of 0.24.
+6. Choose **The evidence** to scroll to the [research report](https://vivek-314.github.io/ShopperSense-study/#research), or **Model notebook** for the actual training code. The report's separate validation threshold lab recomputes counts from saved validation scores; it does not retrain models or alter official test results. Its slider spans 0–1 in 0.01 steps, resets to 0.50 and marks the research choice of 0.24.
 
 For example, this illustrative input uses only the current website fields:
 
@@ -298,7 +298,7 @@ ShopperSense-study/
 │   ├── report.py                  # Research HTML, figures and source bundle
 │   └── predictor/
 │       ├── train.py               # Six-input model and browser export
-│       └── workspace.html         # Prediction-page source template
+│       └── workspace.html         # Single-page shell and predictor source template
 ├── notebooks/
 │   ├── README.md                  # Notebook index and execution guide
 │   ├── 01_data_and_reasoning.ipynb
@@ -316,7 +316,8 @@ ShopperSense-study/
 ├── docs/
 │   ├── index.html, workspace.css, workspace.js
 │   ├── predictor-engine.js        # Real browser inference and CSV handling
-│   ├── research.html, styles.css, app.js, threshold.js
+│   ├── research.html, legacy-redirect.js   # Old report URL redirects to the same page
+│   ├── app.js, threshold.js            # Research interaction on the main page
 │   ├── data/                     # Exported model and report evidence
 │   └── assets/                   # Figures, CSV templates and source ZIP
 ├── scripts/                       # Notebook generators, checks and preview server
@@ -390,7 +391,7 @@ node tests/check_predictor.cjs
 python -m src.report
 ```
 
-The first command rebuilds research evidence; the second trains the separate six-input model, saves its evidence and exports `docs/data/predictor.json`. The final command generates `docs/research.html`, copies the workspace template to `docs/index.html` and rebuilds the downloadable source/evidence ZIP. Trusted local joblib models are regenerated under ignored `results/models/`; never load untrusted joblib files.
+The first command rebuilds research evidence; the second trains the separate six-input model, saves its evidence and exports `docs/data/predictor.json`. The final command combines the predictor and research templates into `docs/index.html`, preserves `docs/research.html` as a redirect and rebuilds the downloadable source/evidence ZIP. Trusted local joblib models are regenerated under ignored `results/models/`; never load untrusted joblib files.
 
 After text/style/config changes, `python -m src.report` can rebuild report artifacts without retraining. Python training-source changes require the corresponding model pipeline to be rerun so its run identifier and evidence reflect that source. Such reproduction commands intentionally regenerate outputs; they do not justify changing decisions after inspecting test scores.
 
@@ -412,7 +413,7 @@ Notebook 03 also writes separate notebook decision/metric records and the featur
 python -m http.server 8765 --bind 127.0.0.1 --directory docs
 ```
 
-Open [the local app](http://127.0.0.1:8765/) or [local research report](http://127.0.0.1:8765/research.html). Use HTTP rather than double-clicking HTML, because model and validation-data loading use `fetch()`.
+Open [the local app](http://127.0.0.1:8765/) or [local research report](http://127.0.0.1:8765/#research). Use HTTP rather than double-clicking HTML, because model and validation-data loading use `fetch()`.
 
 The dependency-free Node fallback is `node scripts/serve.cjs`, serving [localhost:8766](http://127.0.0.1:8766/). A localhost address is a preview on the server's machine, not a public website URL. Network is needed for dependency installation; model training and local inference then work without external runtime APIs.
 

@@ -43,23 +43,31 @@
       console.error('Threshold lab unavailable:', error.message);
     }
   }
-  const links = Array.from(document.querySelectorAll('.sidebar nav a'));
+  const links = Array.from(document.querySelectorAll('.header nav a'));
   if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) if (entry.isIntersecting) {
         links.forEach(link => {
-          const active = link.hash === '#' + entry.target.id;
+          const active = link.hash === '#' + (entry.target.closest('.research-body') ? 'research' : entry.target.id);
           link.classList.toggle('active', active);
           if (active) link.setAttribute('aria-current', 'location');
           else link.removeAttribute('aria-current');
         });
       }
     }, { rootMargin: '-8% 0px -70% 0px' });
-    document.querySelectorAll('main > section').forEach(section => observer.observe(section));
+    document.querySelectorAll('main > section, .research-body > section').forEach(section => observer.observe(section));
   }
-  fetch('data/summary.json').then(response => { if (!response.ok) throw new Error('Summary unavailable'); return response.json(); }).then(data => {
-    const selected = data.test_metrics.find(r => r.model === data.selection.selected_model && r.feature_set === 'full');
-    if (selected) document.querySelector('.score-scale').style.setProperty('--score-width', Math.max(0, Math.min(100, selected.ap * 100)) + '%');
-  }).catch(() => { /* The full generated report remains readable without this decorative bar. */ });
+  // A direct link into an expanded evidence block must reveal its target.
+  function revealTarget() {
+    let id;
+    try {id=decodeURIComponent(location.hash.slice(1));} catch {return;}
+    const target=byId(id);
+    if(!target) return;
+    let parent=target.parentElement, opened=false;
+    while(parent) {if(parent.tagName==='DETAILS'&&!parent.open) {parent.open=true;opened=true;}parent=parent.parentElement;}
+    if(opened) target.scrollIntoView({block:'start'});
+  }
+  window.addEventListener('hashchange',revealTarget);
+  revealTarget();
   initLab();
 })();
