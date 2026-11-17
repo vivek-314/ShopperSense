@@ -14,7 +14,12 @@ from sklearn.metrics import precision_recall_curve
 
 from .config import ROOT
 
-COLORS = ['#e6e6e6', '#a3a3a3', '#77797d']
+CHART_THEMES = {
+    'dark': {'blue': '#62adff', 'orange': '#ffb65c', 'teal': '#4ed6b3', 'neutral': '#b9c3d1',
+             'background': '#07080a', 'foreground': '#e6e6e6', 'muted': '#b9b9bb', 'border': '#454647'},
+    'light': {'blue': '#2563eb', 'orange': '#b45309', 'teal': '#087f6b', 'neutral': '#657184',
+              'background': '#ffffff', 'foreground': '#17181b', 'muted': '#4c5564', 'border': '#b9bec8'},
+}
 
 
 def read_json(path):
@@ -38,15 +43,24 @@ def table(headers, rows, caption='', classes=''):
 def figure(name, caption, alt):
     header = (ROOT/'results/figures'/f'{name}.png').read_bytes()[:24]
     width, height = int.from_bytes(header[16:20], 'big'), int.from_bytes(header[20:24], 'big')
-    return f'<figure><img src="assets/{name}.png" alt="{html.escape(alt)}" loading="lazy" width="{width}" height="{height}"><figcaption>{caption}</figcaption></figure>'
+    return f'<figure><img src="assets/{name}.png?v=2" data-chart-dark-src="assets/{name}.png?v=2" data-chart-light-src="assets/{name}-light.png?v=2" alt="{html.escape(alt)}" loading="lazy" width="{width}" height="{height}"><figcaption>{caption}</figcaption></figure>'
 
 
 def make_figures(output, docs, frame, parts, summary):
+    for theme in CHART_THEMES:
+        make_themed_figures(output, docs, frame, parts, summary, theme)
+
+
+def make_themed_figures(output, docs, frame, parts, summary, theme):
+    palette = CHART_THEMES[theme]
+    colors = [palette['blue'], palette['orange'], palette['teal']]
     dest = output/'figures'
     dest.mkdir(exist_ok=True)
-    plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 11, 'axes.spines.top': False, 'axes.spines.right': False, 'axes.edgecolor': '#454647', 'axes.labelcolor': '#b9b9bb', 'text.color': '#e6e6e6', 'xtick.color': '#b9b9bb', 'ytick.color': '#b9b9bb', 'figure.facecolor': '#07080a', 'axes.facecolor': '#07080a', 'legend.facecolor': '#07080a', 'svg.fonttype': 'none', 'svg.hashsalt': 'ShopperSense'})
+    plt.rcParams.update({'font.family': 'DejaVu Sans', 'font.size': 11, 'axes.spines.top': False, 'axes.spines.right': False, 'axes.edgecolor': palette['border'], 'axes.labelcolor': palette['muted'], 'text.color': palette['foreground'], 'xtick.color': palette['muted'], 'ytick.color': palette['muted'], 'figure.facecolor': palette['background'], 'axes.facecolor': palette['background'], 'legend.facecolor': palette['background'], 'svg.fonttype': 'none', 'svg.hashsalt': 'ShopperSense-'+theme})
 
     def save(name, fig):
+        if theme == 'light':
+            name += '-light'
         fig.tight_layout(pad=1.5)
         fig.savefig(dest/f'{name}.svg', metadata={'Date': None}, bbox_inches='tight')
         svg = dest/f'{name}.svg'
@@ -58,7 +72,7 @@ def make_figures(output, docs, frame, parts, summary):
 
     fig, ax = plt.subplots(figsize=(8, 4.4))
     counts = frame.Revenue.value_counts().reindex([0, 1])
-    ax.barh(['No purchase', 'Purchase'], counts, color=['#707174', '#e6e6e6'], height=.5)
+    ax.barh(['No purchase', 'Purchase'], counts, color=[palette['blue'], palette['teal']], height=.5)
     for i, count in enumerate(counts):
         ax.text(count+100, i, f'{count:,} ({count/len(frame):.1%})', va='center')
     ax.set_xlim(0, counts.max()*1.3)
@@ -68,9 +82,10 @@ def make_figures(output, docs, frame, parts, summary):
 
     train = frame.loc[parts['train']]
     visitor = train.groupby('VisitorType').Revenue.agg(['size', 'sum', 'mean']).reset_index()
-    visitor.to_csv(output/'eda_visitor_type.csv', index=False)
+    if theme == 'dark':
+        visitor.to_csv(output/'eda_visitor_type.csv', index=False)
     fig, ax = plt.subplots(figsize=(8, 4.4))
-    ax.bar(visitor.VisitorType.str.replace('_', ' '), visitor['mean'], color=COLORS, width=.5)
+    ax.bar(visitor.VisitorType.str.replace('_', ' '), visitor['mean'], color=colors, width=.5)
     for i, row in visitor.iterrows():
         ax.text(i, row['mean']+.008, f'{row["sum"]:,}/{row["size"]:,} · {row["mean"]:.1%}', ha='center', fontsize=10)
     ax.set_ylim(0, max(visitor['mean'])*1.3)
@@ -81,27 +96,28 @@ def make_figures(output, docs, frame, parts, summary):
     intensity_rows = []
     fig, ax = plt.subplots(figsize=(8, 4.4))
     bins = np.linspace(0, np.log1p(train.ProductRelated.max()), 32)
-    for y, color in [(0, '#77797d'), (1, '#e6e6e6')]:
+    for y, color in [(0, palette['blue']), (1, palette['teal'])]:
         subset = train[train.Revenue == y].ProductRelated
-        ax.hist(np.log1p(subset), bins=bins, density=True, alpha=.5, color=color, label=f'{"Purchase" if y else "No purchase"} (n={len(subset):,})')
+        ax.hist(np.log1p(subset), bins=bins, density=True, alpha=.8 if y else 1, color=color, histtype='stepfilled' if y else 'step', linewidth=1.8, linestyle='-' if y else '--', zorder=1 if y else 2, label=f'{"Purchase" if y else "No purchase"} (n={len(subset):,})')
         intensity_rows.append({'Revenue': y, 'support': len(subset), 'median': float(subset.median()), 'p95': float(subset.quantile(.95)), 'max': int(subset.max())})
     ax.set_xlabel('log(1 + product-related pages) · training only')
     ax.set_ylabel('Density within each target class')
     ax.legend(frameon=False)
     save('browsing_intensity', fig)
-    pd.DataFrame(intensity_rows).to_csv(output/'eda_intensity.csv', index=False)
+    if theme == 'dark':
+        pd.DataFrame(intensity_rows).to_csv(output/'eda_intensity.csv', index=False)
 
     predictions = pd.read_csv(output/'test_predictions.csv')
     fig, ax = plt.subplots(figsize=(8, 4.8))
-    for name, color, line in zip(['Logistic Regression', 'Decision Tree', 'Random Forest'], COLORS, ['-', '--', '-.']):
+    for name, color, line in zip(['Logistic Regression', 'Decision Tree', 'Random Forest'], colors, ['-', '--', '-.']):
         sub = predictions[(predictions.model == name) & (predictions.feature_set == 'full') & (predictions.threshold == .5)]
         precision, recall, _ = precision_recall_curve(sub.y_true, sub.purchase_score)
         ap = next(r['ap'] for r in summary['test_metrics'] if r['model'] == name and r['feature_set'] == 'full' and r['threshold'] == .5)
-        ax.step(recall, precision, where='post', color=color, linestyle=line, label=f'{name} · AP {ap:.3f}', lw=1.8)
+        ax.step(recall, precision, where='post', color=color, linestyle=line, label=f'{name} · AP {ap:.3f}', lw=2.2)
     prevalence = predictions[(predictions.model == 'Dummy')].y_true.mean()
-    ax.axhline(prevalence, color='#b9b9bb', ls=':', label=f'Purchase prevalence {prevalence:.3f}')
+    ax.axhline(prevalence, color=palette['neutral'], ls=':', label=f'Purchase prevalence {prevalence:.3f}')
     ax.set(xlabel='Recall · purchase class', ylabel='Precision · purchase class', xlim=(0, 1), ylim=(0, 1.04))
-    ax.legend(frameon=True, facecolor='#07080a', edgecolor='none', framealpha=1, fontsize=9, loc='lower left')
+    ax.legend(frameon=True, facecolor=palette['background'], edgecolor='none', framealpha=1, fontsize=9, loc='lower left')
     save('precision_recall', fig)
 
     selected = summary['selection']['selected_model']
@@ -110,7 +126,7 @@ def make_figures(output, docs, frame, parts, summary):
     for ax, cut in zip(axes, [.5, threshold]):
         r = next(r for r in summary['test_metrics'] if r['model'] == selected and r['feature_set'] == 'full' and r['threshold'] == cut)
         matrix = [[r['tn'], r['fp']], [r['fn'], r['tp']]]
-        ax.imshow(matrix, cmap='Greys', vmin=0, vmax=max(r['tn'], r['tp']))
+        ax.imshow(matrix, cmap='Blues', vmin=0, vmax=max(r['tn'], r['tp']))
         for y in range(2):
             for x in range(2):
                 ax.text(x, y, f'{["TN", "FP", "FN", "TP"][y*2+x]}\n{matrix[y][x]:,}', ha='center', va='center', fontsize=14, color='white' if y == 0 and x == 0 else '#111214')
@@ -119,17 +135,17 @@ def make_figures(output, docs, frame, parts, summary):
 
     depth = pd.read_csv(output/'tree_depth_comparison.csv')
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    for partition, color in [('train', '#e6e6e6'), ('validation', '#9c9c9d')]:
+    for partition, color, marker, line in [('train', palette['blue'], 'o', '-'), ('validation', palette['orange'], 's', '--')]:
         sub = depth[depth.partition == partition]
-        ax.plot(sub.max_depth, sub.f1, marker='o', label=partition.title(), color=color, lw=2)
+        ax.plot(sub.max_depth, sub.f1, marker=marker, linestyle=line, label=partition.title(), color=color, lw=2.2)
     ax.set(xlabel='Tree maximum depth · min_samples_leaf=5', ylabel='Purchase F1 · fixed threshold 0.50', ylim=(0, 1))
     ax.legend(frameon=False)
     save('tree_depth', fig)
 
     fig, ax = plt.subplots(figsize=(8, 4.5))
-    for offset, feature_set, color, label in [(-.18, 'full', '#e6e6e6', 'Full features'), (.18, 'no_PageValues', '#77797d', 'Without PageValues')]:
+    for offset, feature_set, color, label in [(-.18, 'full', palette['blue'], 'Full features'), (.18, 'no_PageValues', palette['orange'], 'Without PageValues')]:
         values = [next(r['ap'] for r in summary['test_metrics'] if r['model'] == name and r['feature_set'] == feature_set and r['threshold'] == .5) for name in ['Logistic Regression', 'Random Forest']]
-        bars = ax.bar(np.arange(2)+offset, values, .34, color=color, label=label)
+        bars = ax.bar(np.arange(2)+offset, values, .34, color=color, label=label, hatch='///' if feature_set == 'no_PageValues' else None, edgecolor=palette['background'], linewidth=.7)
         ax.bar_label(bars, fmt='%.3f', padding=4)
     ax.set(xticks=[0, 1], xticklabels=['Logistic Regression', 'Random Forest'], ylabel='Average precision · held-out test', ylim=(0, 1))
     ax.legend(frameon=False)
@@ -221,7 +237,7 @@ def generate_report(output, docs, frame, parts):
     (docs/'research.html').write_text('''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#040506"><title>ShopperSense — Research has moved</title>
-<script src="theme.js?v=1"></script><link rel="stylesheet" href="workspace.css?v=8"><script src="legacy-redirect.js" defer></script></head>
+<script src="theme.js?v=2"></script><link rel="stylesheet" href="workspace.css?v=9"><script src="legacy-redirect.js" defer></script></head>
 <body class="redirect-page"><main><h1>The research is now on the main page.</h1><p>The predictor, results and evidence are together in one place.</p><a class="button primary" href="./#research">Open ShopperSense research</a></main></body></html>''', encoding='utf-8')
     (docs/'.nojekyll').touch()
     for name in ['data_manifest.json', 'quality.json', 'selection.json', 'test_metrics.csv', 'validation_metrics.csv', 'pagevalues_comparison.csv', 'error_analysis.json', 'cv_results.csv', 'splits.json', 'threshold_grid.csv']:

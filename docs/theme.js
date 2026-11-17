@@ -16,6 +16,10 @@
     root.dataset.theme = theme;
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.content = theme === 'light' ? '#f7f8fa' : '#040506';
+    document.querySelectorAll('img[data-chart-light-src]').forEach(img => {
+      const source = theme === 'light' ? img.dataset.chartLightSrc : img.dataset.chartDarkSrc;
+      if (img.getAttribute('src') !== source) img.setAttribute('src', source);
+    });
     if (button) {
       const next = theme === 'light' ? 'dark' : 'light';
       button.querySelector('.theme-label').textContent = next === 'light' ? 'Light mode' : 'Dark mode';

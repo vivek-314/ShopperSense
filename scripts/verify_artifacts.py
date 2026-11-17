@@ -19,7 +19,7 @@ class Links(HTMLParser):
         attrs = dict(attrs)
         if 'id' in attrs:
             self.ids.append(attrs['id'])
-        for key in ['href', 'src']:
+        for key in ['href', 'src', 'data-chart-dark-src', 'data-chart-light-src']:
             if key in attrs:
                 self.links.append(attrs[key])
 

@@ -1653,9 +1653,6 @@ fieldset legend { position: absolute; width: 1px; height: 1px; overflow: hidden;
 @media (max-width: 400px) { .context-fields { grid-template-columns: 1fr; } }
 .mode-navigation button[aria-selected=true] { border-color: var(--control-border); } .header nav a[aria-current] { text-decoration: underline; text-underline-offset: 6px; }
 
-/* The scientific exports are monochrome: invert luminance for the light canvas,
-   preserving their labels, line styles and values without duplicate downloads. */
-:root[data-theme="light"] figure img { filter: invert(1); }
 @media (max-width: 1000px) {
   .header-actions .nav-source { display: none; }
 }
@@ -1664,7 +1661,4 @@ fieldset legend { position: absolute; width: 1px; height: 1px; overflow: hidden;
   .header .brand { padding-top: 0; }
   .header nav { order: 3; }
   .header-actions { margin-left: auto; }
-}
-@media print {
-  figure img { filter: invert(1); }
 }

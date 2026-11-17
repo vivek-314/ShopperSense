@@ -42,7 +42,7 @@ L 161.012479 280.2
 L 161.012479 105.627803
 L 69.557933 105.627803
 z
-" clip-path="url(#peadbde93fb)" style="fill: #e6e6e6"/>
+" clip-path="url(#paf976aa4b2)" style="fill: #62adff; stroke: #07080a; stroke-width: 0.7; stroke-linejoin: miter"/>
    </g>
    <g id="patch_4">
     <path d="M 338.54189 280.2
@@ -50,7 +50,7 @@ L 429.996436 280.2
 L 429.996436 85.042483
 L 338.54189 85.042483
 z
-" clip-path="url(#peadbde93fb)" style="fill: #e6e6e6"/>
+" clip-path="url(#paf976aa4b2)" style="fill: #62adff; stroke: #07080a; stroke-width: 0.7; stroke-linejoin: miter"/>
    </g>
    <g id="patch_5">
     <path d="M 166.392158 280.2
@@ -58,7 +58,7 @@ L 257.846703 280.2
 L 257.846703 187.711847
 L 166.392158 187.711847
 z
-" clip-path="url(#peadbde93fb)" style="fill: #77797d"/>
+" clip-path="url(#paf976aa4b2)" style="fill: url(#h701b3fb09a); stroke: #07080a; stroke-width: 0.7; stroke-linejoin: miter"/>
    </g>
    <g id="patch_6">
     <path d="M 435.376115 280.2
@@ -66,18 +66,18 @@ L 526.830661 280.2
 L 526.830661 184.858714
 L 435.376115 184.858714
 z
-" clip-path="url(#peadbde93fb)" style="fill: #77797d"/>
+" clip-path="url(#paf976aa4b2)" style="fill: url(#h701b3fb09a); stroke: #07080a; stroke-width: 0.7; stroke-linejoin: miter"/>
    </g>
    <g id="matplotlib.axis_1">
     <g id="xtick_1">
      <g id="line2d_1">
       <defs>
-       <path id="mc940be1494" d="M 0 0
+       <path id="m6be69f6432" d="M 0 0
 L 0 3.5
 " style="stroke: #b9b9bb; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#mc940be1494" x="163.702318" y="280.2" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
+       <use xlink:href="#m6be69f6432" x="163.702318" y="280.2" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_1">
@@ -87,7 +87,7 @@ L 0 3.5
     <g id="xtick_2">
      <g id="line2d_2">
       <g>
-       <use xlink:href="#mc940be1494" x="432.686275" y="280.2" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
+       <use xlink:href="#m6be69f6432" x="432.686275" y="280.2" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_2">
@@ -99,12 +99,12 @@ L 0 3.5
     <g id="ytick_1">
      <g id="line2d_3">
       <defs>
-       <path id="ma86d0de002" d="M 0 0
+       <path id="m0f9df7d1b2" d="M 0 0
 L -3.5 0
 " style="stroke: #b9b9bb; stroke-width: 0.8"/>
       </defs>
       <g>
-       <use xlink:href="#ma86d0de002" x="46.694297" y="280.2" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
+       <use xlink:href="#m0f9df7d1b2" x="46.694297" y="280.2" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_3">
@@ -114,7 +114,7 @@ L -3.5 0
     <g id="ytick_2">
      <g id="line2d_4">
       <g>
-       <use xlink:href="#ma86d0de002" x="46.694297" y="226.435742" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
+       <use xlink:href="#m0f9df7d1b2" x="46.694297" y="226.435742" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_4">
@@ -124,7 +124,7 @@ L -3.5 0
     <g id="ytick_3">
      <g id="line2d_5">
       <g>
-       <use xlink:href="#ma86d0de002" x="46.694297" y="172.671484" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
+       <use xlink:href="#m0f9df7d1b2" x="46.694297" y="172.671484" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_5">
@@ -134,7 +134,7 @@ L -3.5 0
     <g id="ytick_4">
      <g id="line2d_6">
       <g>
-       <use xlink:href="#ma86d0de002" x="46.694297" y="118.907227" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
+       <use xlink:href="#m0f9df7d1b2" x="46.694297" y="118.907227" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_6">
@@ -144,7 +144,7 @@ L -3.5 0
     <g id="ytick_5">
      <g id="line2d_7">
       <g>
-       <use xlink:href="#ma86d0de002" x="46.694297" y="65.142969" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
+       <use xlink:href="#m0f9df7d1b2" x="46.694297" y="65.142969" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_7">
@@ -154,7 +154,7 @@ L -3.5 0
     <g id="ytick_6">
      <g id="line2d_8">
       <g>
-       <use xlink:href="#ma86d0de002" x="46.694297" y="11.378711" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
+       <use xlink:href="#m0f9df7d1b2" x="46.694297" y="11.378711" style="fill: #b9b9bb; stroke: #b9b9bb; stroke-width: 0.8"/>
       </g>
      </g>
      <g id="text_8">
@@ -194,7 +194,7 @@ L 421.941328 29.636992
 L 421.941328 21.936992
 L 399.941328 21.936992
 z
-" style="fill: #e6e6e6"/>
+" style="fill: #62adff; stroke: #07080a; stroke-width: 0.7; stroke-linejoin: miter"/>
     </g>
     <g id="text_14">
      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #e6e6e6" x="430.741328" y="29.636992" transform="rotate(-0 430.741328 29.636992)">Full features</text>
@@ -205,7 +205,7 @@ L 421.941328 46.137852
 L 421.941328 38.437852
 L 399.941328 38.437852
 z
-" style="fill: #77797d"/>
+" style="fill: url(#h701b3fb09a); stroke: #07080a; stroke-width: 0.7; stroke-linejoin: miter"/>
     </g>
     <g id="text_15">
      <text style="font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #e6e6e6" x="430.741328" y="46.137852" transform="rotate(-0 430.741328 46.137852)">Without PageValues</text>
@@ -214,8 +214,52 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="peadbde93fb">
+  <clipPath id="paf976aa4b2">
    <rect x="46.694297" y="11.378711" width="503" height="268.821289"/>
   </clipPath>
+ </defs>
+ <defs>
+  <pattern id="h701b3fb09a" patternUnits="userSpaceOnUse" x="0" y="0" width="72" height="72">
+   <rect x="0" y="0" width="73" height="73" fill="#ffb65c"/>
+   <path d="M -36 36
+L 36 -36
+M -32 40
+L 40 -32
+M -28 44
+L 44 -28
+M -24 48
+L 48 -24
+M -20 52
+L 52 -20
+M -16 56
+L 56 -16
+M -12 60
+L 60 -12
+M -8 64
+L 64 -8
+M -4 68
+L 68 -4
+M 0 72
+L 72 0
+M 4 76
+L 76 4
+M 8 80
+L 80 8
+M 12 84
+L 84 12
+M 16 88
+L 88 16
+M 20 92
+L 92 20
+M 24 96
+L 96 24
+M 28 100
+L 100 28
+M 32 104
+L 104 32
+M 36 108
+L 108 36
+" style="fill: #07080a; stroke: #07080a; stroke-width: 1.0; stroke-linecap: butt; stroke-linejoin: miter"/>
+  </pattern>
  </defs>
 </svg>
