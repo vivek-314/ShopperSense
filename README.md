@@ -1,195 +1,450 @@
-# ShopperSense
+# ShopperSense — Online Shopping Purchase Intention Prediction
 
-A marketer-facing purchase prediction workspace backed by a reproducible ML study. The homepage accepts **new sessions through a form or CSV** and produces real model predictions and a downloadable, ranked review list. The research report is supporting evidence at [research.html](https://vivek-314.github.io/ShopperSense-study/research.html). The original specification is preserved in [PRD.md](PRD.md); the user's later request for a practical prediction tool expands that scope.
+ShopperSense uses machine learning to study browsing-session behaviour and predict whether a session will end in a purchase. It combines a reproducible model comparison with an interactive website for scoring new sessions individually or from a CSV. Predictions describe patterns learned from historical data; they do not confirm a visitor's intentions or guarantee a sale.
 
-## Use the prediction workspace
+**Live Website:** [Open the prediction workspace](https://vivek-314.github.io/ShopperSense-study/)
 
-Open [ShopperSense](https://vivek-314.github.io/ShopperSense-study/). No Python installation, server account, model selection or threshold adjustment is needed to use it.
+**Research Report:** [Read the investigation and results](https://vivek-314.github.io/ShopperSense-study/research.html)
 
-1. **Predict a session:** enter page counts, seconds in the product and information page categories, visitor type and weekend status. All six inputs are explicit. Click **Predict purchase** for a Purchase predicted / No purchase predicted label, a signal score, model influences and a suggested review priority. Changing an input marks the old result stale until rescored.
-2. **Score a CSV:** download the blank template and add one row per new browsing session. Upload your CSV, inspect row validation, then score it. Results are sorted by score; filter the review list and download all rows with exact scores, labels, original row numbers and errors. Invalid rows are preserved without scores. Up to 10,000 rows / 5 MB are supported. Standard UCI column names also work; Revenue and extra columns do not affect predictions.
-3. **Review before acting:** predictions are uncertain. This separate six-input model detected **245/286 buyers** on the historical test split but generated **894 false alarms**; **245/1139 flagged sessions** purchased. Use it to experiment with review prioritisation, then validate on your own shop before automating campaign spend. A score of 30/100 is not a calibrated 30% purchase probability.
+**Model Code:** [Explore the executed, cell-by-cell training notebook](notebooks/03_six_input_models_step_by_step.ipynb)
 
-All inference happens in the browser using an actual exported Random Forest. Input records and CSVs are not uploaded to a prediction server, stored in browser persistence, or added to training. The model file is downloaded once on page load. This is a deployable static application on GitHub Pages; it has no backend service that must remain running. It does **not** automatically connect to Shopify, GA4, a CRM or a live event stream. Export/mapping from your analytics is required. No website access or analytics credentials have been supplied for automatic collection.
+## Motivation — Why ShopperSense?
 
-This product model uses exactly ProductRelated, ProductRelated_Duration, Informational, Informational_Duration, VisitorType and Weekend. Administrative and Administrative_Duration (account_pages/account_seconds) are removed from both training inputs and the app. It has **its own** evaluation: Random Forest, max_depth=8, min_samples_leaf=10, 150 trees; validation AP=0.279134, fixed threshold=0.12; test AP=0.293266, precision=0.215101, recall=0.856643, F1=0.343860. It also excludes PageValues, bounce/exit rates and technical category codes. The stronger **0.726 AP research result below belongs to a different, full-feature model** and is not the workspace predictor's accuracy.
+An online store can receive many visits without every visitor making a purchase. Some people browse products extensively, others look for information, and others leave quickly. These recorded activities may contain useful signals about which sessions are associated with purchasing.
 
-The practical model reused the original stratified train/validation/test row IDs. Its training-only CV and validation decision were frozen before its test evaluation; the historical test split had already been used for the research study, so this is a separately specified secondary condition, not independent new external validation. Live/partial-session and cross-store performance remain unvalidated.
+We developed ShopperSense to investigate those signals using a modest, understandable set of machine-learning methods. The aim is to compare the evidence carefully and make the resulting model usable by someone who does not work with ML code. For a business user, the website offers a way to explore session prioritisation; this project has not demonstrated increased sales, marketing ROI or the effect of contacting a visitor.
 
-Rebuild the real product model and verify browser inference:
+## Problem Statement and Project Objectives
 
-```bash
-python -m src.predictor.train
-node tests/check_predictor.cjs
-python -m pytest -q
-python -m src.report
+The question is: **How well can recorded browsing-session characteristics identify sessions that end in a purchase, compared with always predicting no purchase?**
+
+This is a **binary classification** problem: each session belongs to one of two outcome classes.
+
+| Element | Meaning in this project |
+| --- | --- |
+| Unit of analysis | One recorded browsing session, not a person's lifetime customer profile |
+| Inputs | Observed session characteristics such as page counts, time spent and visitor type |
+| Target | `Revenue`: `TRUE` / `1` means purchase; `FALSE` / `0` means no purchase |
+| Model output | A purchase score and a purchase/no-purchase label using a fixed decision cutoff |
+
+The objectives are to establish a majority-class baseline, compare three standard classifiers, inspect their mistakes, measure dependence on selected features, and provide a practical interface for new inputs. We also examine the tradeoff between detecting buyers and generating false purchase alarms.
+
+The data consists of historical session summaries. Performance partway through a live visit is a separate question that this dataset and evaluation have not validated.
+
+## What Does ShopperSense Do?
+
+### A. Machine-learning research
+
+The research workflow audits the supplied dataset, explores training data, fits models through consistent pipelines, and compares their validation and test performance. It also studies errors, tree depth, removal of `PageValues`, and identical inputs crossing partition boundaries. The [research report](https://vivek-314.github.io/ShopperSense-study/research.html) explains these results without requiring readers to run a notebook.
+
+### B. Interactive prediction website
+
+The [website](https://vivek-314.github.io/ShopperSense-study/) accepts six clearly labelled inputs or a CSV containing multiple new sessions. It returns real model predictions, input influences, review priorities and downloadable results. Inference runs in the browser using an exported fitted model; it does not look up a customer in a fixed list of saved predictions.
+
+These components use **different fitted models**. The research benchmark uses all 17 predictors, including analytics variables that need a prediction-time availability audit. The website uses a separately trained six-input model to keep data entry practical. The stronger research results must not be attributed to the website predictor.
+
+## Dataset Overview
+
+We use the [UCI Online Shoppers Purchasing Intention Dataset, dataset 468](https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset), attributed to C. Sakar and Yomi Kastro (2018), [DOI: 10.24432/C5F88Q](https://doi.org/10.24432/C5F88Q). It is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+| Property | Verified supplied file |
+| --- | --- |
+| Sessions | 12,330 |
+| Predictors | 17 |
+| Target column | `Revenue` |
+| Purchase sessions | 1,908 — approximately 15.5% |
+| Non-purchase sessions | 10,422 — approximately 84.5% |
+| Missing cells / infinite numeric values / negative numeric values | 0 / 0 / 0 |
+| Excess complete duplicate rows | 125, preserved |
+
+The observed dimensions and class counts match the UCI description. The file was supplied locally; its original download date is unknown. The [data documentation](data/README.md), [manifest](results/data_manifest.json) and [quality report](results/quality.json) record its exact identity and inspection findings. We did not compare its bytes against a newly downloaded UCI archive.
+
+### What the features represent
+
+| Dataset fields | Plain-language meaning | Used by the website? |
+| --- | --- | --- |
+| `ProductRelated`, `ProductRelated_Duration` | Product-related page count and total time spent on those pages | Yes |
+| `Informational`, `Informational_Duration` | Informational page count and total time spent on those pages | Yes |
+| `Administrative`, `Administrative_Duration` | Administrative-category page count and time | No; removed from the practical predictor |
+| `BounceRates`, `ExitRates` | Page-level analytics measures of bouncing and exits | No |
+| `PageValues` | An analytics measure of value associated with pages visited before a transaction | No; feature availability is a research concern |
+| `SpecialDay` | Proximity to a special day, on a 0–1 scale | No |
+| `Month`, `OperatingSystems`, `Browser`, `Region`, `TrafficType` | Calendar, device, region and traffic categories; numeric codes are category labels | No |
+| `VisitorType` | New visitor, returning visitor or other | Yes |
+| `Weekend` | Whether the visit occurred on a weekend | Yes |
+
+Page-category examples such as information or account pages are guidance, not a mapping to a particular store's URLs. Real exports need consistent category definitions. Product-page counts do not necessarily count different products.
+
+The class imbalance matters: a model that always predicts no purchase can appear accurate while missing every buyer. That is why purchase-focused metrics accompany accuracy throughout the project.
+
+## Project Workflow
+
+```mermaid
+flowchart TD
+    A["Supplied UCI CSV"] --> B["Verify file identity, schema, target and quality"]
+    B --> C["Save stratified train / validation / test rows — seed 42"]
+    C --> D["Explore training data only"]
+    D --> E["17-feature research condition"]
+    D --> F["Six-input website condition"]
+    E --> G["Independently in each condition: training-only 3-fold CV"]
+    F --> G
+    G --> H["Fit preprocessing inside each fold; tune LR, Tree and Forest; fit Dummy baseline"]
+    H --> I["Validation: select model by AP, then threshold by F1"]
+    I --> J["Freeze model, features, parameters and threshold"]
+    J --> K["Evaluate frozen models on test; save scores, metrics and errors"]
+    K --> L["Research report, figures and evidence files"]
+    K --> M["Export the fitted six-input model to JSON"]
+    M --> N["Verify Python / JavaScript prediction agreement"]
+    N --> O["Website: new session or CSV → predictions and downloads"]
 ```
 
-`src.predictor.train` writes `docs/data/predictor.json`, `results/predictor/` (all CV candidates, frozen selection, unrounded predictions, separate test metrics, warnings and 3,703 parity cases), and explicit historical example CSV / blank template downloads. `src.report` regenerates `docs/research.html`, copies the workspace template to `docs/index.html`, and rebuilds the source bundle without overwriting the app with a research homepage. The original research pipeline (`python -m src.run_all`) remains reproducible. A full rebuild runs both the research pipeline and the predictor training command.
+Structural inspection covers the whole source file; exploratory comparisons use training rows. Data splitting happens before any learned preprocessing. Each condition then runs its own training-only search and validation decision, with no refit on validation after selection.
 
-The JavaScript engine supports programmatic browser use after loading the exported JSON: `ShopperPredictor.predict(session, modelArtifact)`. This function uses the six canonical CSV field names. Its preprocessing, float32 tree comparisons and all 150 fitted trees are exported exactly. Tree path influences are grouped by original input and sum to the prediction minus the mean root score; they are path-dependent associations inside the model, not explanations of purchase motives. The Node parity check matched Python **exactly on all 3,703 cases**, including three constructed fresh sessions, and checked CSV quoting/aliases, invalid rows, formula-safe export, score decomposition and a 10,000-row batch. No forecast is obtained by looking up a customer in the dataset.
+The research workflow also includes prespecified no-`PageValues` runs and a separate duplicate-group sensitivity. The six-input model reuses the saved row IDs for comparison with earlier conditions; it is not an independently collected external test.
 
-## Submission notebook: actual model code, cell by cell
+## Data Preprocessing
 
-**[03 — Six-input models, step by step](notebooks/03_six_input_models_step_by_step.ipynb)** contains 20 explained code cells with real estimator, GridSearchCV and `.fit(...)` code for the baseline, Logistic Regression, Decision Tree and Random Forest. It executes on the supplied dataset, reproduces the saved split IDs, freezes validation decisions, checks final metrics against production, plots the confusion matrix, compares removal of account inputs, makes a fresh prediction, and asserts that its fitted model equals the deployed browser export. Executed outputs are committed. See [the notebook index](notebooks/README.md) for the full cell outline and distinction from the earlier full-feature research notebooks.
+We preserve the raw CSV and assign stable, zero-based `source_row_id` values from its original order. Repeated rows and large values are retained rather than automatically removed. The audit found no detected invalid category/range values or noninteger page counts. Skewed activity distributions are inspected with training summaries and log-scaled plots; those plotting choices do not automatically transform model inputs.
 
-```bash
-python -m src.predictor.train
-python scripts/create_training_notebook.py
-python -m nbconvert --to notebook --execute notebooks/03_six_input_models_step_by_step.ipynb --output executed_03.ipynb --ExecutePreprocessor.timeout=300
+| Processing choice | Implementation and reason |
+| --- | --- |
+| Binary fields | Explicit `Revenue` and `Weekend` conversion to 0/1 |
+| Numeric missingness | Training median if needed; no missing values were observed in the supplied file |
+| Categorical missingness | A fixed missing-category token if needed |
+| Categorical encoding | `OneHotEncoder(handle_unknown='ignore')`; category codes do not imply ordered distances |
+| Numeric scale | `StandardScaler` for Logistic Regression; original scale for trees |
+| Excluded model inputs | Target and source row ID in every condition; the website also excludes all fields outside its six-input contract |
+| Imbalance / outliers | Stratification and purchase-focused evaluation; no SMOTE, class weighting, clipping or automatic outlier removal |
+
+`Pipeline` and `ColumnTransformer` ensure medians, category vocabularies and scaling statistics are fitted inside each training fold. Validation and test distributions do not enter those fitted transformations.
+
+The primary split holds out 15% test, then uses `15/85` of the remaining rows as validation. Both calls stratify `Revenue` with `random_state=42`.
+
+| Partition | Sessions | Purchases | Purpose |
+| --- | ---: | ---: | --- |
+| Training | 8,630 | 1,336 | Fit preprocessing, tune parameters and fit estimators |
+| Validation | 1,850 | 286 | Select model and decision threshold |
+| Test | 1,850 | 286 | Evaluate the frozen decisions |
+
+Exact IDs, class counts and source checksum are saved in [splits.json](results/splits.json). See [data.py](src/data.py), [research preprocessing](src/preprocessing.py) and [practical-model preprocessing](src/predictor/train.py) for implementation.
+
+## Machine-Learning Models
+
+| Model | How it works and why it is included | Main limitation |
+| --- | --- | --- |
+| Dummy Classifier | Always predicts the training majority class; establishes the minimum useful reference | Ignores browsing activity and detects no buyers at the default cutoff |
+| Logistic Regression | Fits a regularized linear relationship in log odds; offers a simple comparison | Limited nonlinear interactions without engineered terms |
+| Decision Tree | Learns feature-threshold rules; captures nonlinear relationships and illustrates overfitting | Deeper trees can fit training details that do not generalize |
+| Random Forest | Averages 150 randomized trees to reduce single-tree variance | Harder to interpret than one tree or a linear model |
+
+The same bounded search design is used in the research and practical conditions:
+
+| Model | Training-only grid |
+| --- | --- |
+| Dummy | No search; `strategy='most_frequent'` |
+| Logistic Regression | `C=[0.1, 1, 10]`; `max_iter=2000` |
+| Decision Tree | `max_depth=[3, 5, 8]`, `min_samples_leaf=[5, 20]` |
+| Random Forest | `max_depth=[8, None]`, `min_samples_leaf=[2, 10]`; 150 trees |
+
+`GridSearchCV` maximizes **average precision (AP)** using three shuffled stratified training folds and seed 42, then refits the best candidate on the full training partition. Every candidate and fold score is saved. Unresolved convergence warnings stop a training run. The research searches contain 20 candidates including the no-`PageValues` variants; the current practical comparison contains 13. Dummy is not tuned.
+
+**Decision protocol:** select the highest validation AP among learned models; if a model is within 0.005 of the highest, prefer the simpler model in the order Logistic Regression, Decision Tree, Random Forest. This tolerance is a practical rule, not a significance test. For the selected model, maximize validation purchase F1 on `0.05, 0.06, …, 0.95`, breaking ties toward the larger cutoff. Save the decision before test evaluation, retain training-only fits, and never revise the choice from test rankings.
+
+The [20-cell training notebook](notebooks/03_six_input_models_step_by_step.ipynb) contains actual estimator, search and `.fit(...)` code for each of the four models. Code cells 8–11 fit the models; later cells reproduce selection, evaluation and the deployed export.
+
+## Feature Selection and the Practical Prediction Model
+
+The full-feature benchmark investigates how informative the recorded dataset is. The website instead asks for a smaller set of fields that users can map from session activity, without requiring `PageValues`, bounce/exit analytics or technical category codes.
+
+| Website input | Dataset field | What the user supplies |
+| --- | --- | --- |
+| `product_pages` | `ProductRelated` | Product-related page count |
+| `product_seconds` | `ProductRelated_Duration` | Total product-page time in seconds |
+| `information_pages` | `Informational` | Informational page count |
+| `information_seconds` | `Informational_Duration` | Total informational-page time in seconds |
+| `visitor_type` | `VisitorType` | New, returning or other visitor |
+| `weekend` | `Weekend` | Yes/no weekend flag |
+
+`session_id` is an optional reference and is never a predictor. All six browsing inputs are explicit; the browser rejects missing values instead of inventing unshown defaults. Enter zero only for genuinely absent activity, not unknown measurements.
+
+Administrative/account page counts and durations were removed from the practical model to simplify the requested interface. They remain in the original data and research benchmark. Removal was measured, not justified by an unsupported claim of irrelevance:
+
+| Random Forest condition | Validation AP | Test AP |
+| --- | ---: | ---: |
+| Earlier eight-input predictor | 0.316011 | 0.299416 |
+| Current six-input predictor | 0.279134 | 0.293266 |
+
+The [same-row comparison](results/predictor/feature_removal_comparison.csv) includes all three learned models. Earlier results are preserved in [predictor_previous_eight_inputs](results/predictor_previous_eight_inputs/). Each condition used the declared training search, so differences include any resulting parameter-selection change. These are descriptive comparisons, not causal or significance claims.
+
+Both current selected models are Random Forests, but their fitted parameters and thresholds differ:
+
+| Condition | Features | Selected forest parameters | Validation-selected cutoff |
+| --- | ---: | --- | ---: |
+| Research benchmark | 17 | 150 trees; unbounded depth; minimum leaf size 2 | 0.24 |
+| Live website | 6 | 150 trees; maximum depth 8; minimum leaf size 10 | 0.12 |
+
+Removing `PageValues` or simplifying the form does not prove that the remaining summaries were available early enough for a live intervention.
+
+## Model Evaluation and Results
+
+Purchase is the positive class in every table. Test results below use **1,850 sessions: 286 purchases and 1,564 non-purchases**. Display rounding is separate from unrounded saved scores and metric calculations.
+
+| Metric | What it tells us |
+| --- | --- |
+| Accuracy | Fraction of all sessions classified correctly; can conceal missed buyers when non-purchases dominate |
+| Precision | Of sessions predicted to purchase, the fraction that actually purchased: `TP / (TP + FP)` |
+| Recall | Of actual purchase sessions, the fraction detected: `TP / (TP + FN)` |
+| F1-score | Harmonic mean of precision and recall; used for the illustrative cutoff rule |
+| Average precision (AP) | Purchase ranking quality across thresholds, summarized over recall increments; the primary model-selection metric, not trapezoidal PR-AUC |
+| ROC-AUC | Complementary ranking discrimination between purchase and non-purchase sessions |
+| Confusion matrix | Counts of true negatives (TN), false positives (FP), false negatives (FN) and true positives (TP) |
+
+Precision is mathematically undefined when no positive predictions are made; the implementation uses `zero_division=0` and displays zero. Recall uses the same zero-division convention. Single-class ROC-AUC would be undefined. The class supports are included in saved outputs.
+
+### Full-feature research benchmark
+
+Validation selected Random Forest with AP **0.725437**. The test ranking did not change that selection. All models are compared at 0.50, with an additional row for the selected model's frozen 0.24 cutoff.
+
+| Model | Cutoff | Accuracy | Precision | Recall | F1 | AP | ROC-AUC |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Dummy | 0.50 | 0.845 | 0* | 0.000 | 0.000 | 0.155 | 0.500 |
+| Logistic Regression | 0.50 | 0.886 | 0.784 | 0.367 | 0.500 | 0.649 | 0.890 |
+| Decision Tree | 0.50 | 0.900 | 0.749 | 0.531 | 0.622 | 0.698 | 0.919 |
+| Random Forest | 0.50 | 0.897 | 0.762 | 0.483 | 0.591 | 0.726 | 0.919 |
+| **Selected Random Forest** | **0.24** | **0.874** | **0.567** | **0.780** | **0.657** | **0.726** | **0.919** |
+
+\*No predicted buyers; precision is displayed as zero by convention.
+
+The majority baseline achieves 84.5% accuracy but misses all 286 buyers. At its selected cutoff, the research forest detects **223/286 buyers**, misses **63**, and falsely flags **170/1,564 non-buyers**. The Decision Tree has higher accuracy and F1 than the forest at 0.50; the forest was selected for validation AP, not because it won every metric.
+
+![Full-feature test precision–recall curves for the three learned models](results/figures/precision_recall.png)
+
+*Generated from the research test predictions. This figure describes the 17-feature benchmark, not the live website model.*
+
+Sources: [validation metrics](results/validation_metrics.csv), [test metrics](results/test_metrics.csv), [frozen selection](results/selection.json) and [row-level test predictions](results/test_predictions.csv).
+
+### Six-input website model
+
+Validation independently selected Random Forest with AP **0.279134** and a frozen cutoff of **0.12**. This condition reuses the research project's historical split; it is not a new external evaluation.
+
+| Model | Cutoff | Accuracy | Precision | Recall | F1 | AP | ROC-AUC |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Dummy | 0.50 | 0.845 | 0* | 0.000 | 0.000 | 0.155 | 0.500 |
+| Logistic Regression | 0.50 | 0.842 | 0.375 | 0.031 | 0.058 | 0.283 | 0.699 |
+| Decision Tree | 0.50 | 0.839 | 0.300 | 0.031 | 0.057 | 0.269 | 0.703 |
+| Random Forest | 0.50 | 0.845 | 0* | 0.000 | 0.000 | 0.293 | 0.714 |
+| **Deployed Random Forest** | **0.12** | **0.495** | **0.215** | **0.857** | **0.344** | **0.293** | **0.714** |
+
+\*No predicted buyers; precision is displayed as zero by convention.
+
+At 0.50 the practical forest predicts no purchases. Lowering its cutoff to the validation F1 choice finds **245/286 buyers**, but produces **894 false alarms** among **1,139 flagged sessions** and misses **41 buyers**. Only **21.5% of flagged sessions actually purchased**; accuracy falls to 49.5%. The threshold trades many false alarms for higher recall. It is not a demonstrated profit-maximizing business decision.
+
+The six-input model ranks purchases better than the majority reference by AP, but most positive predictions at its deployed cutoff are false alarms. It is an experimental review aid, not a validated basis for automated marketing spend.
+
+Sources: [practical validation metrics](results/predictor/validation_metrics.csv), [practical test metrics](results/predictor/test_metrics.csv), [frozen selection](results/predictor/selection.json) and [predictions](results/predictor/predictions.csv).
+
+### Feature availability, duplicates and errors
+
+The [PageValues experiment](results/pagevalues_comparison.csv) separately retunes Logistic Regression and Random Forest without that feature on the same rows. Test AP changes from **0.649399 to 0.344051** for LR and **0.725975 to 0.354664** for RF. This measures dependence; it does not prove target leakage.
+
+The primary split has 29, 13 and 7 identical predictor vectors shared across train/validation, train/test and validation/test respectively; all overlapping rows have zero purchases. A [secondary group split](results/group_splits.json) keeps identical vectors together, allocating 14/3/3 of 20 stratified group folds to train/validation/test. It reuses the primary forest parameters and 0.24 cutoff, without group-test tuning. Its test has 1,850 sessions and 287 purchases, AP **0.751015** and F1 **0.687316**. Different rows and support make this a sensitivity check, not a replacement primary estimate or proof of a duplicate effect.
+
+The [research error analysis](results/error_analysis.json) shows the first four source row IDs per FP/FN category and subgroup denominators by `VisitorType` and training-derived `ProductRelated` bins: low ≤10, medium >10 to 29, high >29. Small groups warrant caution. The [tree-depth comparison](results/tree_depth_comparison.csv) fixes minimum leaf size at 5 and cutoff at 0.50 to compare train versus validation F1; it did not change the declared selection protocol.
+
+## Interactive Website — Try ShopperSense
+
+### [Open the live prediction workspace →](https://vivek-314.github.io/ShopperSense-study/)
+
+No Python installation, model selection or threshold adjustment is required to use the published app.
+
+1. Choose **Predict a session** and enter the six observed values. All times are in seconds; zero means no recorded activity in that category.
+2. Select **Predict purchase** to see a purchase/no-purchase label, a score out of 100, influential inputs and a review-priority suggestion. Editing an input marks the old result stale until rescored.
+3. Read the score as an uncalibrated model output. The label uses the fixed 12/100 cutoff; a positive label does not mean a verified probability above 50% or a confirmed sale.
+4. For multiple sessions, choose **Score a CSV**, download the [blank template](docs/assets/session-template.csv), and add one row per session. The app accepts up to **10,000 rows / 5 MB**, including original UCI header aliases.
+5. Review input errors, score valid rows, filter the ranked list, and download all results. The export preserves row numbers, inputs, unrounded scores, labels, errors and model version. Invalid rows remain present without invented scores. `Revenue` and extra fields, including legacy account columns, are ignored for prediction.
+6. Open **Research & accuracy** for the [research report](https://vivek-314.github.io/ShopperSense-study/research.html), or **Model notebook** for the actual training code. The report's separate validation threshold lab recomputes counts from saved validation scores; it does not retrain models or alter official test results. Its slider spans 0–1 in 0.01 steps, resets to 0.50 and marks the research choice of 0.24.
+
+For example, this illustrative input uses only the current website fields:
+
+```csv
+session_id,product_pages,product_seconds,information_pages,information_seconds,visitor_type,weekend
+visit-104,23,620,2,40,new,yes
 ```
 
-The previous eight-input results are preserved under `results/predictor_previous_eight_inputs/` (source commit `9ad77f6`). Same-row test AP changed from 0.299416 to 0.293266 for Random Forest after removing account inputs; validation AP changed from 0.316011 to 0.279134. This is measured evidence, not a claim that the removed fields were unimportant. The notebook exports the complete comparison to `results/predictor/feature_removal_comparison.csv`. Original source bytes and full-feature research evidence are preserved.
+It describes a new visitor who viewed 23 product-related pages for 620 seconds and two information pages for 40 seconds during a weekend visit. The fitted six-input model gives score **0.2332711519011321**, displayed as **23.3/100**, and the label **Purchase predicted** at cutoff 0.12. This constructed input was checked against Python; it is not an observed new customer or an evaluation result.
 
-**Question:** How well can recorded browsing-session characteristics identify sessions that end in a purchase, compared with always predicting no purchase?
+The five downloadable historical examples are explicitly labelled training examples, not evidence of independent accuracy. Input influences are signed contributions inside the fitted model, not explanations of visitor motives or causes of purchasing.
 
-One row is one historical browsing session; Revenue=1 means purchase. This study uses recorded session summaries. It does not establish early-session performance, causal conversion uplift, customer motives, or price/quality preferences.
+Scoring happens locally in the browser. Session inputs and CSVs are not sent to a prediction server, stored in browser persistence or added to training. The site has no automatic Shopify, GA4, CRM or live-event connection: users supply an export or enter data themselves. Labels, keyboard controls, focus states, error messages and scrollable tables support desktop and small-screen use.
 
-## Start here
-
-The application is `docs/index.html`; the full research report is `docs/research.html`. Run from this repository's root directory (the directory containing this README):
-
-```powershell
-.venv\Scripts\python.exe -m http.server 8765 --bind 127.0.0.1 --directory docs
-```
-
-Open <http://127.0.0.1:8765/>. If your machine blocks the Python preview executable, the dependency-free Node fallback is `node scripts/serve.cjs`, at <http://127.0.0.1:8766/>. A local preview is not a public submission URL. Double-clicking HTML does not reliably support `fetch()` for the threshold lab; use HTTP.
-
-**Website:** [ShopperSense research report](https://vivek-314.github.io/ShopperSense-study/). **Repository:** [vivek-314/ShopperSense-study](https://github.com/vivek-314/ShopperSense-study). GitHub Pages deployed successfully and the published report and validation JSON were checked in the browser. The older ShopperSense repository remains untouched.
-
-## What was actually run
-
-The supplied CSV has **12,330 rows, 17 predictors, 1,908 purchases**, matching UCI's dimensions and class counts. It contains no missing cells, infinite numeric values, negative numeric values, or detected invalid category/range values. All **125 excess complete duplicates** were preserved. Raw SHA-256:
+## Repository Structure
 
 ```text
-b3055ee355f59134d851d32641183cb4a8b45def7124d2f50442a042f358e0d9
+ShopperSense-study/
+├── README.md
+├── PRD.md                          # Original implementation specification
+├── requirements.txt               # Pinned direct dependencies
+├── requirements-lock.txt          # Full tested Windows environment
+├── site_config.json               # Actual repository and website URLs
+├── data/
+│   ├── README.md                  # Attribution, source and byte identity
+│   └── raw/online_shoppers_intention.csv
+├── src/
+│   ├── data.py                    # Schema, quality and saved partitions
+│   ├── preprocessing.py           # Research transformations
+│   ├── train.py                   # Shared estimators and bounded grids
+│   ├── evaluate.py                # Metrics and validation-only decisions
+│   ├── run_all.py                 # Offline research pipeline
+│   ├── report.py                  # Research HTML, figures and source bundle
+│   └── predictor/
+│       ├── train.py               # Six-input model and browser export
+│       └── workspace.html         # Prediction-page source template
+├── notebooks/
+│   ├── README.md                  # Notebook index and execution guide
+│   ├── 01_data_and_reasoning.ipynb
+│   ├── 02_models_and_results.ipynb
+│   └── 03_six_input_models_step_by_step.ipynb
+├── results/
+│   ├── data_manifest.json, quality.json, splits.json, selection.json
+│   ├── cv_results.csv, validation_metrics.csv, test_metrics.csv
+│   ├── validation_predictions.csv, test_predictions.csv
+│   ├── figures/, error_analysis.json, pagevalues_comparison.csv
+│   ├── group_splits.json, group_sensitivity.csv
+│   ├── predictor/                 # Current six-input evidence
+│   ├── predictor_previous_eight_inputs/  # Archived comparison
+│   └── models/                    # Local joblib files; ignored in Git
+├── docs/
+│   ├── index.html, workspace.css, workspace.js
+│   ├── predictor-engine.js        # Real browser inference and CSV handling
+│   ├── research.html, styles.css, app.js, threshold.js
+│   ├── data/                     # Exported model and report evidence
+│   └── assets/                   # Figures, CSV templates and source ZIP
+├── scripts/                       # Notebook generators, checks and preview server
+├── tests/                         # Scientific integrity and JS parity checks
+└── .github/workflows/pages.yml     # Publishes docs/ with GitHub Pages
 ```
 
-This identifies the supplied bytes. No newly downloaded UCI archive was used to claim canonical byte identity. See [data/README.md](data/README.md) and `results/data_manifest.json` for provenance, the full schema, versions and licensing.
+Start with [notebook 01](notebooks/01_data_and_reasoning.ipynb) for data reasoning, [notebook 02](notebooks/02_models_and_results.ipynb) for the original research evidence, and [notebook 03](notebooks/03_six_input_models_step_by_step.ipynb) for actual six-input training code. All **36 code cells across the three committed notebooks** have executed outputs and zero error outputs. See the [notebook index](notebooks/README.md) for the 20-cell model-training outline.
 
-Six prespecified variants were fitted: majority Dummy, Logistic Regression, Decision Tree and Random Forest with full features; LR and RF without PageValues. All 20 search candidates and their three fold scores are saved. A separate group-aware sensitivity reused the selected model's frozen parameters and threshold on different rows with identical inputs kept together.
+Research and practical result folders separately save complete CV candidates, configuration, decisions and predictions. [verification.json](results/verification.json) preserves research checks, while [practical verification](results/predictor/verification.json) records exact Python/JavaScript agreement on **3,703 cases**: 3,700 validation/test rows plus three constructed new inputs. The checks also cover CSV quoting, aliases, invalid rows, safe spreadsheet export, score contributions and a 10,000-row batch. The original six threshold fixtures and 15 Python tests passed in the latest implementation verification; nonfatal pandas parser deprecations and Windows kernel notices are documented rather than treated as model convergence failures.
 
-**Validation selected Random Forest**, max_depth=None, min_samples_leaf=2, n_estimators=150. Validation AP=0.725437. The validation F1 threshold grid selected **0.24**. Held-out test, full features:
+## Installation and Running Locally
 
-| Condition | AP | Precision | Recall | F1 | Accuracy | TN / FP / FN / TP |
-| --- | ---: | ---: | ---: | ---: | ---: | --- |
-| Majority baseline, 0.50 | 0.154595 | 0* | 0 | 0 | 0.845405 | 1564 / 0 / 286 / 0 |
-| Selected forest, 0.50 | 0.725975 | 0.762431 | 0.482517 | 0.591006 | 0.896757 | 1521 / 43 / 148 / 138 |
-| Selected forest, frozen 0.24 | 0.725975 | 0.567430 | 0.779720 | 0.656848 | 0.874054 | 1394 / 170 / 63 / 223 |
+### Requirements and environment
 
-\*Precision is undefined with no predicted positives; zero_division=0 displays zero. Accuracy alone obscures the baseline's missed purchases. AP is **average precision**, not trapezoidal PR-AUC. Scores are not claimed calibrated.
-
-Removing PageValues changes test AP from 0.649399 to 0.344051 for LR and from 0.725975 to 0.354664 for RF. This quantifies dependence, not proof of leakage or real-time availability. The group-aware forest test has 1,850 sessions / 287 purchases, AP=0.751015 and F1=0.687316 at the reused 0.24 threshold. It is a separate sensitivity estimate with different rows and support.
-
-## Install and reproduce
-
-Tested Python: **3.12.14**. Node 20+ is needed only for the small JavaScript parity test and optional fallback server; the deployed website has no server, external runtime APIs, npm dependencies or build framework.
+The ML environment was tested with **Python 3.12.14**. **Node.js 20+** is needed for JavaScript parity checks and the optional preview server, not for Python training or using the public website. Main packages are NumPy, pandas, scikit-learn, matplotlib, Jupyter, pytest and joblib.
 
 ```bash
+git clone https://github.com/vivek-314/ShopperSense-study.git
+cd ShopperSense-study
 python -m venv .venv
 ```
 
-Windows PowerShell:
+Activate on Windows PowerShell:
 
 ```powershell
 .venv\Scripts\Activate.ps1
 ```
 
-Linux/macOS:
+Or on Linux/macOS:
 
 ```bash
 source .venv/bin/activate
 ```
 
-Then, from the repository root:
+Then install dependencies:
 
 ```bash
 python -m pip install -r requirements.txt
+```
+
+[requirements.txt](requirements.txt) pins direct dependencies, including NumPy 2.5.5, pandas 3.1.1, scikit-learn 1.9.1 and matplotlib 3.11.2. [requirements-lock.txt](requirements-lock.txt) records the full tested Windows environment; use it for exact Windows restoration. The direct dependency list is preferable across platforms because the full lock includes Windows-specific packages.
+
+### Data access and integrity
+
+The raw CSV is included in `data/raw/`. If absent, obtain the archive from the [UCI dataset page](https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset), extract the CSV to that location, and verify its SHA-256:
+
+```bash
+python -c "from pathlib import Path; import hashlib; print(hashlib.sha256(Path('data/raw/online_shoppers_intention.csv').read_bytes()).hexdigest())"
+```
+
+Expected supplied-file checksum:
+
+```text
+b3055ee355f59134d851d32641183cb4a8b45def7124d2f50442a042f358e0d9
+```
+
+Investigate a different checksum, including possible line-ending differences, rather than silently editing data to match it. Preserve attribution and the raw bytes. The loader records the actual hash and schema for every run.
+
+### Reproduce both model conditions and run checks
+
+Run all commands from the repository root with the environment active:
+
+```bash
 python -m src.run_all --data data/raw/online_shoppers_intention.csv
-python -m pytest -q
+python -m src.predictor.train
 python -m tests.export_threshold_fixtures
+python -m pytest -q
 node tests/check_threshold.cjs
+node tests/check_predictor.cjs
+python -m src.report
+```
+
+The first command rebuilds research evidence; the second trains the separate six-input model, saves its evidence and exports `docs/data/predictor.json`. The final command generates `docs/research.html`, copies the workspace template to `docs/index.html` and rebuilds the downloadable source/evidence ZIP. Trusted local joblib models are regenerated under ignored `results/models/`; never load untrusted joblib files.
+
+After text/style/config changes, `python -m src.report` can rebuild report artifacts without retraining. Python training-source changes require the corresponding model pipeline to be rerun so its run identifier and evidence reflect that source. Such reproduction commands intentionally regenerate outputs; they do not justify changing decisions after inspecting test scores.
+
+### Execute the notebooks
+
+The notebooks resolve imports when launched from the root or `notebooks/`. The first two inspect research evidence; the third actually fits all four practical models and asserts agreement with the exported model. These commands write new executed copies without replacing the committed originals:
+
+```bash
 python -m nbconvert --to notebook --execute notebooks/01_data_and_reasoning.ipynb --output executed_01.ipynb
 python -m nbconvert --to notebook --execute notebooks/02_models_and_results.ipynb --output executed_02.ipynb
+python -m nbconvert --to notebook --execute notebooks/03_six_input_models_step_by_step.ipynb --output executed_03.ipynb --ExecutePreprocessor.timeout=300
+```
+
+Notebook 03 also writes separate notebook decision/metric records and the feature-removal comparison under `results/predictor/`; it does not overwrite production selection. If regenerating its source after code changes, `python scripts/create_training_notebook.py` creates an unexecuted notebook that must be executed again. The [notebook guide](notebooks/README.md) explains each cell.
+
+### Preview the website
+
+```bash
 python -m http.server 8765 --bind 127.0.0.1 --directory docs
 ```
 
-`python -m nbconvert` directly uses the active environment. Each notebook explicitly adds the project root to `sys.path`, works from `notebooks/` or the root, and imports shared source functions. The training command fits models; the notebooks inspect evidence, repeat structural checks and reproduce validation decisions without retuning test outcomes. Both must run top to bottom without hidden state. Source notebooks contain executed outputs after verification; the commands above produce new executed copies.
+Open [the local app](http://127.0.0.1:8765/) or [local research report](http://127.0.0.1:8765/research.html). Use HTTP rather than double-clicking HTML, because model and validation-data loading use `fetch()`.
 
-`requirements.txt` pins the directly used packages. `requirements-lock.txt` records the exact full tested Windows environment; for exact Windows restoration use `pip install -r requirements-lock.txt`. The direct dependency list is preferable across platforms because the full lock contains Windows-specific dependencies. Network is needed to install packages, not to train or view the local report afterward.
+The dependency-free Node fallback is `node scripts/serve.cjs`, serving [localhost:8766](http://127.0.0.1:8766/). A localhost address is a preview on the server's machine, not a public website URL. Network is needed for dependency installation; model training and local inference then work without external runtime APIs.
 
-The implementation machine's initial training/evaluation stage took **44.9 seconds** (52.7 seconds including report generation); see `results/run.json` for the current rerun. Hardware, platform and dependencies affect runtime. Seeds, saved row IDs and the fixed parameter grids make the decisions deterministic in the tested environment. Across platforms use a numerical tolerance of **1e-10** for metrics/scores; CSV timing columns, timestamps, ZIP metadata, library rendering and notebook outputs are not byte-identical reproduction targets. Identical tested environments should reproduce selected parameters and threshold. Never change the frozen decision in response to test outcomes.
+### Reproducibility and deployment notes
 
-On restrictive Windows runners, set TEMP, TMP, MPLCONFIGDIR, JUPYTER_RUNTIME_DIR and IPYTHONDIR to project-local writable directories if the default sandbox directories reject writes. Kernel execution requires local process/socket access. The implementation used these overrides; they do not affect model inputs or split IDs.
+Saved runs record approximately **232.9 seconds** for research training/evaluation and **6.45 seconds** for six-input training/export on the implementation machine; runtime varies by hardware and environment. Seeds, exact row IDs and small fixed grids support reproduction. Use a cross-platform numerical tolerance of `1e-10` for scores/metrics; timings, timestamps, rendered files and ZIP metadata are not byte-identical targets. Python/JS export checks use `1e-12` tolerance and recorded zero maximum difference in the tested environment.
 
-## Evaluation procedure
+On restrictive Windows runners, project-local writable locations for `TEMP`, `TMP`, `MPLCONFIGDIR`, `JUPYTER_RUNTIME_DIR` and `IPYTHONDIR` may be needed; notebook kernels require local process/socket access. Earlier selector/TCP and kernel-teardown notices were nonfatal.
 
-1. Assign stable zero-based source row IDs. Preserve raw bytes and all source rows; structurally audit the whole file. Training-only EDA informs interpretation.
-2. Stratify with random_state=42: hold out 15% test, then use validation fraction 15/85 on the rest. Exact sizes: **8,630 train / 1,850 validation / 1,850 test**, with **1,336 / 286 / 286 purchases**. Assert complete/disjoint coverage and save IDs with the source hash.
-3. Within training-only shuffled three-fold StratifiedKFold (seed=42), use GridSearchCV(scoring='average_precision', refit=True). LR: C=[0.1,1,10], max_iter=2000. Tree: depth=[3,5,8], min leaf=[5,20]. RF: 150 trees, depth=[8,None], min leaf=[2,10]. No class weighting, resampling or outlier removal. Dummy has no tuning. Save all candidate/fold scores and warnings; unresolved convergence warnings stop a run.
-4. Fit transformations inside every training fold: numeric median if needed, categorical constant missing token, OneHotEncoder(handle_unknown='ignore'). LR alone uses numeric StandardScaler. Numeric-coded categories are categorical; Weekend is explicit 0/1. Target and ID are never inputs.
-5. Compare full-feature learned models by **validation AP** at 0.50. Any AP within 0.005 of the highest is eligible; prefer LR, Tree, Forest in that order. This is a practical rule, not a significance test. The no-PageValues variants are prespecified secondary conditions, not feature-selection candidates.
-6. For the selected full-feature model maximize validation purchase F1 over 0.05..0.95 in 0.01 steps, breaking ties toward the larger threshold. Persist `selection.json` before any test predictions. Models remain fitted on training only; no validation refit.
-7. Report every frozen variant on test at 0.50 and the selected model at its chosen threshold. Test rankings cannot change selection. Persist row-level scores, exact thresholds, support, AP, ROC-AUC, accuracy, purchase precision/recall/F1 and confusion counts.
-8. Define ProductRelated low/medium/high bins with training tertiles (**10 and 29**), reuse them for test error analysis. Deterministic FP/FN examples use the first four source row IDs per error category. Report supports and denominators; do not infer visitor motives.
-9. Also report the prespecified duplicate sensitivity: 20 StratifiedGroupKFold groups, 14/3/3 fold allocation, approximate 70/15/15. Identical full predictor hashes never straddle its partitions. Clone/refit the primary selected model with frozen hyperparameters and reuse its threshold. No separate group-test tuning; do not relabel this as the original split.
+GitHub Pages serves the static `docs/` directory using the [included workflow](.github/workflows/pages.yml). It runs on relevant `main` pushes or manual dispatch; Python is offline, not a service hosted by Pages. For another repository, set its real URLs in [site_config.json](site_config.json), regenerate the report, select **GitHub Actions** in Settings → Pages, and verify the workflow and returned public URL. All assets use relative paths for repository-subpath hosting.
 
-The Decision Tree depth diagnostic uses fixed min_samples_leaf=5 and threshold=0.50 on train versus validation; it does not change model selection. All cross-partition repeated predictor vectors in this supplied file have zero observed purchases; overlap counts remain visible and the secondary analysis is still reported.
+## Key Findings and Limitations
 
-## Outputs and code
+- **Browsing summaries contain predictive signal.** The full-feature forest achieves test AP 0.726 versus 0.155 for the majority reference. This is within-source discrimination, not demonstrated business benefit.
+- **Feature availability matters.** Removing `PageValues` substantially lowers LR/RF AP. The simpler six-input forest has test AP 0.293 and a much larger false-alarm burden. Neither condition validates an early decision point.
+- **Accuracy alone is misleading.** The baseline misses every buyer despite 84.5% accuracy. The practical cutoff recovers many buyers while incorrectly flagging many more non-buyers.
+- **Removing account inputs has a measurable tradeoff.** The practical forest's validation AP falls from 0.316011 to 0.279134 and test AP from 0.299416 to 0.293266. The evidence does not establish that these fields were irrelevant.
+- **Evaluation has boundaries.** This is one historical source and one primary random split, with reused partitions for later conditions. There is no new-store, future-period or independent external validation, confidence interval or significance claim.
+- **Outputs are uncertain associations.** Scores are uncalibrated; the F1 cutoff has no established business cost ratio. No causal conversion uplift, customer motive, product price/quality preference or lifetime customer behaviour can be inferred. Subgroup and duplicate sensitivities do not remove these limitations.
 
-| Location | Purpose |
-| --- | --- |
-| `src/data.py`, `preprocessing.py` | Explicit schema/target handling, quality, deterministic rows, fold-local transforms |
-| `src/train.py`, `evaluate.py`, `run_all.py` | Estimators/grids, pure selection/metrics, ordered offline workflow |
-| `src/report.py`, `report_template.html` | Generate SVG/PNG figures, static narrative, JSON and source bundle from artifacts |
-| `results/data_manifest.json`, `quality.json` | Byte identity, schema, actual quality, attribution and environment |
-| `results/splits.json`, `group_splits.json` | Exact primary/secondary row IDs and class counts |
-| `results/cv_results.csv`, `parameters.json` | Every candidate/fold score and fitted configuration |
-| `results/selection.json`, `events.json` | Frozen validation-only decision and order relative to first test evaluation |
-| `results/*_metrics.csv`, `*_predictions.csv` | Full precision scores, stable row order, model, features, partition, threshold and labels |
-| `results/pagevalues_comparison.csv`, `group_sensitivity.csv` | Prespecified secondary experiments |
-| `results/error_analysis.json` | Test errors, training-derived bin boundaries, subgroup denominators, deterministic examples |
-| `results/figures/`, `eda_*.csv`, `tree_depth_comparison.csv` | Generated figures and accessible numeric evidence |
-| `results/models/` | Trusted local joblib pipelines, ignored in Git and regenerated by run_all; never load untrusted joblib files |
-| `notebooks/` | Executable data/reasoning and results notebooks importing shared source |
-| `docs/` | Responsive static report, threshold lab, relative assets, JSON and downloadable source/evidence ZIP |
-| `tests/` | Schema/split isolation, hand-checked metrics, frozen selection, exports and exact threshold parity |
-| `.github/workflows/pages.yml` | GitHub Actions deployment of docs/ only; no Python on the web server |
+## Future Improvements
 
-After a text/style/config-only edit, regenerate the report without training using `python -m src.report`. The run identifier identifies the Python source at the full pipeline run, plus the data hash; rerun the pipeline after Python-source changes to refresh that provenance. Rebuild the source ZIP after README/notebook changes with the same report command.
+Future work could collect timestamped feature snapshots and declare a real prediction point, validate on later periods and other stores, and assess probability calibration under changing purchase prevalence. A defined campaign-cost model would support more meaningful decision thresholds than a generic F1 objective.
 
-## Website interaction and accessibility
+Analytics integrations, automated event ingestion and a retraining workflow could make operation easier, but they would require explicit source access, consistent page mappings and additional verification. These are future capabilities, not connections already provided by this website. Actual conversion benefit would require a prospective intervention study.
 
-The threshold lab loads the frozen selected model's actual **validation** truth/scores from `docs/data/threshold_validation.json`. Range 0.00..1.00, step 0.01; rule score >= threshold, including equality. It starts/resets at 0.50, marks the chosen 0.24, and instantly updates predicted buyers, TP/FP/TN/FN, precision, recall and F1. Keyboard arrow keys work. It neither retrains nor changes test results. Missing/invalid JSON produces an explanatory error and disabled controls, never fake scores.
+## References and Acknowledgments
 
-All essential analysis is readable in static HTML. Charts have captions/alternative text and adjacent numeric evidence. Navigation, skip link, focus states, labelled controls and scrollable metric tables support keyboard use and small screens. The website uses relative URLs to work under a Pages repository subpath.
+- **Dataset:** Sakar, C. & Kastro, Y. (2018). [Online Shoppers Purchasing Intention Dataset](https://doi.org/10.24432/C5F88Q). UCI Machine Learning Repository. [Source definitions and attribution](https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset); [CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
+- **Evaluation:** [scikit-learn: Metrics and scoring](https://scikit-learn.org/stable/modules/model_evaluation.html), including purchase-class metrics and AP terminology.
+- **Deployment:** [GitHub: What is GitHub Pages?](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages).
 
-## Verification
+Source metadata and technical references were consulted during implementation on 16 November 2026. The live prediction and research URLs were rechecked for this README update on 17 November 2026. Figures are generated from the supplied data and saved model outputs; no fabricated performance values or screenshots are used.
 
-Executed checks and limitations are recorded in `results/verification.json`. Final verification passed **11 pytest checks**, **six JS/Python threshold fixtures**, **all 16 notebook code cells** with zero error outputs, relative asset/anchor checks and source ZIP integrity. Browser checks covered desktop and 390px mobile layouts, keyboard thresholds 0, 0.24, 0.50 and 1, reset, and an isolated missing-JSON copy. A deterministic rerun reproduced validation/test metrics and predictions byte for byte. Five pandas CSV-parser deprecation warnings were nonfatal; no estimator convergence warnings occurred. The notebooks completed despite Windows selector/TCP notices and one kernel teardown connection-reset notice. Public deployment evidence is in `results/deployment.json`.
-
-The automated checks verify raw identity/schema, complete stable disjoint IDs, training-only fitted means/vocabularies, unknown-category isolation, every required variant and bounded search, finite aligned scores, hand-checkable confusion metrics, selection/threshold replay from validation only, freeze/test event ordering, group isolation, and equality between website exports and result artifacts. These do not replace human understanding or external validity.
-
-## Deploy with GitHub Pages
-
-The specification targets GitHub Pages. The user selected the new public [ShopperSense-study repository](https://github.com/vivek-314/ShopperSense-study). The older public `vivek-314/ShopperSense` repository is preserved. The workflow publishes this version's `docs/` folder.
-
-1. Create/select the intended GitHub repository, add these project files, and push its `main` branch. Do not commit `.venv`, `.tmp`, trusted-local model binaries, or browser QA caches.
-2. Set its actual `repository_url` and `site_url` in `site_config.json`; run `python -m src.report`. Add actual contributor identities only when known.
-3. In repository **Settings → Pages → Build and deployment**, select **GitHub Actions**. The included workflow uploads `docs/` and deploys on changes pushed to main or manual dispatch.
-4. Observe the Pages workflow complete successfully. Open the real returned Pages URL; verify the JSON, figures, ZIP, repository link and keyboard threshold controls under the repository subpath. A localhost address is not the deployed URL.
-
-## Boundaries, credits and sources
-
-This is one historical source and one primary random split, with small bounded grids and descriptive subgroup/feature/duplicate sensitivities. There is no external or future-period validation, significance test, confidence interval, calibrated-probability claim, known business cost ratio, or intervention experiment. Session timing is unresolved; dropping PageValues does not solve that. No product quality/price preferences or motives are observable. The threshold is an illustrative F1 balance, not an established business optimum.
-
-The requester supplied the PRD and CSV. **Codex authored and executed** the pipeline, tests, report, notebooks and documentation. Automated execution is accurately distinguished from human verification: no human review, personal contributor names, partner roles or grading criteria are invented. Authors should add their real contributions and verify methodology/submission links before submission.
-
-Sources consulted on 16 November 2026:
-
-- Sakar, C. & Kastro, Y. (2018). [Online Shoppers Purchasing Intention Dataset](https://doi.org/10.24432/C5F88Q). UCI, CC BY 4.0. [Dataset record, definitions and license](https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset).
-- [Scikit-learn: Metrics and scoring](https://scikit-learn.org/stable/modules/model_evaluation.html). Metric terminology and average precision.
-- [GitHub: What is GitHub Pages?](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages). Static repository website hosting.
-
-All figures are generated locally from the actual supplied dataset and saved model outputs. No external visual assets, trackers, chart CDNs or fabricated model results are used.
+The requester supplied the CSV, project specification and subsequent scope decisions. **OpenAI Codex authored and executed** the implementation, notebooks, website, documentation and automated checks. Automated verification is distinct from human review: no human verification, contributor identities or partner roles are asserted. Project authors should add their actual contributions and independently review methodology and publication links. The original scope is retained in [PRD.md](PRD.md), and the repository preserves earlier experimental evidence rather than rewriting it to match later interface changes.
